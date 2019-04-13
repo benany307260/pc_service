@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 
 import com.montnets.pc_service.entity.AmzDepartment;
 @Repository
-public interface AmzDepartmentRespository extends JpaRepository<AmzDepartment, Long>, JpaSpecificationExecutor<AmzDepartment> {
+public interface AmzDepartmentRespository extends JpaRepository<AmzDepartment, String>, JpaSpecificationExecutor<AmzDepartment> {
 	
 }

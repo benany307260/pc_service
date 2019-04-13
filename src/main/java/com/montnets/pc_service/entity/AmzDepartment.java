@@ -22,7 +22,7 @@ import javax.persistence.TemporalType;
 public class AmzDepartment implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	@Id
+	//@Id
 	private Long id;
 
 	@Temporal(TemporalType.TIMESTAMP)
@@ -32,6 +32,7 @@ public class AmzDepartment implements Serializable {
 	@Column(name="DATA_SRC_URL")
 	private String dataSrcUrl;
 
+	@Id
 	@Column(name="DEP_ID")
 	private String depId;
 
