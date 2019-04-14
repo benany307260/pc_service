@@ -16,9 +16,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.system.ApplicationHome;
 import org.springframework.core.io.ClassPathResource;
 
+import com.montnets.pc_service.constant.PropEncConstant;
 import com.montnets.pc_service.util.AESUtil;
 import com.montnets.pc_service.util.SafeProperties;
-import com.montnets.rcos_service.constant.PropEncConstant;
 
 import cn.hutool.core.util.HexUtil;
 

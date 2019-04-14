@@ -1,4 +1,4 @@
-package com.montnets.rcos_service.constant;
+package com.montnets.pc_service.constant;
 
 
 public class AMZConstant {

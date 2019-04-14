@@ -31,6 +31,9 @@ public class AmzDepartment implements Serializable {
 
 	@Column(name="DATA_SRC_URL")
 	private String dataSrcUrl;
+	
+	@Column(name="DATA_TAR_URL")
+	private String dataTarUrl;
 
 	@Id
 	@Column(name="DEP_ID")
@@ -62,8 +65,16 @@ public class AmzDepartment implements Serializable {
 
 	@Column(name="URL_DOMAIN")
 	private String urlDomain;
-
+	
 	public AmzDepartment() {
+	}
+
+	public String getDataTarUrl() {
+		return dataTarUrl;
+	}
+
+	public void setDataTarUrl(String dataTarUrl) {
+		this.dataTarUrl = dataTarUrl;
 	}
 
 	public Long getId() {

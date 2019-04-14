@@ -16,6 +16,7 @@ public class AmzCmdtask implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
 	@Column(name="CMD_STATUS")
@@ -70,10 +71,18 @@ public class AmzCmdtask implements Serializable {
 		this.cmdText = cmdText;
 	}
 
+	/**
+	 * 指令类型。100-下载根类目html；101-处理根类目html；102-下载子类目html；103-处理子类目html
+	 * @return
+	 */
 	public Integer getCmdType() {
 		return cmdType;
 	}
 
+	/**
+	 * 指令类型。100-下载根类目html；101-处理根类目html；102-下载子类目html；103-处理子类目html
+	 * @param cmdType
+	 */
 	public void setCmdType(Integer cmdType) {
 		this.cmdType = cmdType;
 	}

@@ -1,4 +1,4 @@
-package com.montnets.pc_service.service.dataprocessing;
+package com.montnets.pc_service.service.department;
 
 import java.io.File;
 import java.util.HashMap;
@@ -21,7 +21,7 @@ import com.alibaba.fastjson.JSONObject;
 import cn.hutool.core.util.StrUtil;
 
 @Service
-public class AmzHtmlService {
+public class DepRootHtmlProcess {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 	
@@ -42,6 +42,10 @@ public class AmzHtmlService {
 		try
 		{
 		    Document doc = Jsoup.parse( new File(htmlFilePath) , "utf-8" );
+		    if(doc == null) {
+		    	log.error("解析html获取类目，获取不到页面对象。htmlFilePath="+htmlFilePath);
+		    	return null;
+		    }
 		    
 		    // 拿到所有的script标签
 		    Elements scriptElements = doc.getElementsByTag("script");
@@ -178,7 +182,7 @@ public class AmzHtmlService {
 	}
 	
 	public static void main(String[] args) {
-		AmzHtmlService html = new AmzHtmlService();
+		DepRootHtmlProcess html = new DepRootHtmlProcess();
 		String path = "D:\\study\\spiders\\pc_service\\page\\index.html";
 		html.getDepsFromHtml(path);
 	}

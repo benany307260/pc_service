@@ -19,9 +19,9 @@ import org.springframework.core.io.ClassPathResource;
 
 import cn.hutool.core.util.HexUtil;
 
+import com.montnets.pc_service.constant.APIConstant;
 import com.montnets.pc_service.util.AESUtil;
 import com.montnets.pc_service.util.SafeProperties;
-import com.montnets.rcos_service.constant.APIConstant;
 
 
 

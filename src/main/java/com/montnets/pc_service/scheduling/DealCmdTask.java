@@ -8,9 +8,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.montnets.pc_service.constant.CmdType;
 import com.montnets.pc_service.dao.CmdMapper;
 import com.montnets.pc_service.entity.AmzCmdtask;
-import com.montnets.pc_service.service.dataprocessing.AmzDepService;
+import com.montnets.pc_service.service.department.AmzDepService;
 
 @Service
 public class DealCmdTask {
@@ -67,9 +68,14 @@ public class DealCmdTask {
 			}
 			
 			// 
-			if(cmdTask.getCmdType() == 101) {
+			if(cmdTask.getCmdType() == CmdType.CMD101) {
 				String cmdText = cmdTask.getCmdText();
-				int res = amzDepService.handleRootDep(cmdText);
+				int res = amzDepService.dealRootDep(cmdText);
+				return res;
+			}
+			if(cmdTask.getCmdType() == CmdType.CMD103) {
+				String cmdText = cmdTask.getCmdText();
+				int res = amzDepService.dealSonDep(cmdText);
 				return res;
 			}
 			
@@ -77,7 +83,7 @@ public class DealCmdTask {
 			
 			// 结果存库
 		} catch (Exception e) {
-			log.error("模板上报线程异常"+e.getMessage());
+			log.error("处理指令，异常。", e);
 			return -9999;
 		}
 	}
