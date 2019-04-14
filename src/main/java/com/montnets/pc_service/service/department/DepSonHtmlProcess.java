@@ -51,7 +51,7 @@ public class DepSonHtmlProcess {
 					continue;
 				}
 				String url = element_a.attr("href");
-				//System.out.println(url);
+				System.out.println(url);
 				Element element_span = element_a.select("span").first();
 				if(element_span == null) {
 					continue;

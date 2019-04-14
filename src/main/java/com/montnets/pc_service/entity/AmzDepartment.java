@@ -68,6 +68,25 @@ public class AmzDepartment implements Serializable {
 	
 	public AmzDepartment() {
 	}
+	
+	public String toString() {
+		return ""
+				+ "id=" + id + ","
+				+ "depId=" + depId + ","
+				+ "depLevel=" + depLevel + ","
+				+ "parentDepId=" + parentDepId + ","
+				+ "parentId=" + parentId + ","
+				+ "showNameEn=" + showNameEn + ","
+				+ "showNameCn=" + showNameCn + ","
+				+ "urlDomain=" + urlDomain + ","
+				+ "url=" + url + ","
+				+ "dataSrcUrl=" + dataSrcUrl + ","
+				+ "dataTarUrl=" + dataTarUrl + ","
+				+ "depStatus=" + depStatus + ","
+				+ "createTime=" + createTime + ","
+				+ "updateTime=" + updateTime + ","
+				;
+	}
 
 	public String getDataTarUrl() {
 		return dataTarUrl;

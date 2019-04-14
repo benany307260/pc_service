@@ -1,8 +1,8 @@
 package com.montnets.pc_service.service.department;
 
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,8 +20,8 @@ import com.montnets.pc_service.entity.AmzDepartment;
 import com.montnets.pc_service.repository.AmzCmdtaskRespository;
 import com.montnets.pc_service.repository.AmzDepartmentRespository;
 import com.montnets.pc_service.util.GetIncrementId;
+import com.montnets.pc_service.util.URLUtil;
 
-import cn.hutool.core.util.HexUtil;
 import cn.hutool.core.util.StrUtil;
 
 @Service
@@ -70,14 +70,6 @@ public class AmzDepService {
 				cmd.setCmdStatus(0);
 				cmd.setCmdType(CmdType.CMD102);
 				
-				/*Map<String,String> paramMap = new HashMap<>();
-				paramMap.put("parentId", dep.getId().toString());
-				paramMap.put("parentDepId", dep.getDepId());
-				String urlHex = HexUtil.encodeHexStr(dep.getUrl());
-				paramMap.put("url", urlHex);
-				paramMap.put("depLevel", String.valueOf(dep.getDepLevel() + 1));
-				String cmdText = JSON.toJSONString(paramMap);*/
-				
 				String cmdTextJson = JSON.toJSONString(dep);
 				
 				cmd.setCmdText(cmdTextJson);
@@ -96,39 +88,41 @@ public class AmzDepService {
 	public int dealSonDep(String cmdText) {
 		
 		try {
-			/*if(StrUtil.isBlank(cmdText)) {
+			if(StrUtil.isBlank(cmdText)) {
 				log.error("处理子类目，指令内容为空。");
 				return -1;
 			}
-			List<AmzDepartment> rootDepList = handleRootDep(htmlFilePath);
-			if(rootDepList == null || rootDepList.size() < 1) {
+			
+			AmzDepartment parentDep = JSON.parseObject(cmdText, AmzDepartment.class);
+			if(parentDep == null) {
+				log.error("处理子类目，父类目对象为null。cmdText="+cmdText);
+				return -2;
+			}
+			
+			List<AmzDepartment> depList = handleSonDep(parentDep);
+			if(depList == null || depList.size() < 1) {
+				log.error("处理子类目，获取子类目列表为空。cmdText="+cmdText);
 				return -1;
 			}
 			
 			List<AmzCmdtask> cmdList = new ArrayList<>();
 			// 写指令通知下载程序下载子类目页面
-			for(AmzDepartment dep : rootDepList) {
+			for(AmzDepartment dep : depList) {
 				AmzCmdtask cmd = new AmzCmdtask();
 				cmd.setCmdStatus(0);
 				cmd.setCmdType(CmdType.CMD102);
 				
-				Map<String,String> paramMap = new HashMap<>();
-				paramMap.put("parentId", dep.getId().toString());
-				paramMap.put("parentDepId", dep.getDepId());
-				String urlHex = HexUtil.encodeHexStr(dep.getUrl());
-				paramMap.put("url", urlHex);
-				paramMap.put("depLevel", String.valueOf(dep.getDepLevel() + 1));
+				String cmdTextJson = JSON.toJSONString(dep);
 				
-				String cmdText = JSON.toJSONString(paramMap);
-				cmd.setCmdText(cmdText);
+				cmd.setCmdText(cmdTextJson);
 				
 				cmdList.add(cmd);
 			}
 			
-			cmdtaskRespository.saveAll(cmdList);*/
+			cmdtaskRespository.saveAll(cmdList);
 			return 1;
 		} catch (Exception e) {
-			//log.error("处理根类目，异常。htmlFilePath="+htmlFilePath, e);
+			log.error("处理子类目，异常。cmdText="+cmdText, e);
 			return -9999;
 		}
 	}
@@ -140,9 +134,13 @@ public class AmzDepService {
 	 */
 	public List<AmzDepartment> handleRootDep(AmzDepartment parentDep) {
 		
+		if(parentDep == null) {
+			log.error("处理根类目，传入父类目对象为null。");
+			return null;
+		}
 		Map<String,String> depMap = depRootHtmlProcess.getDepsFromHtml(parentDep.getDataTarUrl());
 		if(depMap == null || depMap.size() < 1) {
-			log.error("处理一级类目，解析获取不到类目数据。htmlFilePath="+parentDep.getDataTarUrl());
+			log.error("处理根类目，解析获取不到类目数据。htmlFilePath="+parentDep.getDataTarUrl());
 			return null;
 		}
 		
@@ -155,7 +153,7 @@ public class AmzDepService {
 				amzDep.setId(id);
 				
 				String depUrl = depMap.get(key);
-				String depId = getAmzDepId(depUrl);
+				String depId = getAmzRootDepId(depUrl);
 				amzDep.setDepId(depId);
 
 				amzDep.setShowNameCn(key);
@@ -188,16 +186,15 @@ public class AmzDepService {
 		}
 	}
 	
-	/**
-	 * 
-	 * @param htmlFilePath
-	 * @return 返回1为成功
-	 */
-	/*public List<AmzDepartment> handleSonDep(AmzDepartment parentDep) {
+	public List<AmzDepartment> handleSonDep(AmzDepartment parentDep) {
 		
-		Map<String,String> depMap = depSonHtmlProcess.getDepsFromHtml(parentDep.getDataSrcUrl(), parentDep.getDepId());
+		if(parentDep == null) {
+			log.error("处理子类目，传入父类目对象为null。");
+			return null;
+		}
+		Map<String,String> depMap = depSonHtmlProcess.getDepsFromHtml(parentDep.getDataTarUrl(), parentDep.getDepId());
 		if(depMap == null || depMap.size() < 1) {
-			log.error("处理子类目，解析获取不到类目数据。htmlFilePath="+parentDep.getDataSrcUrl()+",parentDepId="+parentDep.getDepId());
+			log.error("处理子类目，解析获取不到类目数据。param="+parentDep.toString());
 			return null;
 		}
 		
@@ -210,7 +207,8 @@ public class AmzDepService {
 				amzDep.setId(id);
 				
 				String depUrl = depMap.get(key);
-				amzDep.setDepId();
+				String depId = getAmzSonDepId(depUrl);
+				amzDep.setDepId(depId);
 
 				amzDep.setShowNameCn(key);
 				amzDep.setShowNameEn(key);
@@ -219,15 +217,15 @@ public class AmzDepService {
 				amzDep.setUrlDomain(AMZConstant.AMZ_US_DOMAIN);
 				
 				// 设置为根目录
-				amzDep.setDepLevel();
+				amzDep.setDepLevel(parentDep.getDepLevel()+1);
 				
-				amzDep.setParentId();
-				amzDep.setParentDepId(parentDepId);
+				amzDep.setParentId(parentDep.getId());
+				amzDep.setParentDepId(parentDep.getDepId());
 				
 				// 类目状态。0-正常；1-被删除
 				amzDep.setDepStatus(0);
 				
-				amzDep.setDataSrcUrl(htmlFilePath);
+				amzDep.setDataSrcUrl(parentDep.getDataTarUrl());
 				
 				amzDep.setCreateTime(new Date());
 				amzDep.setUpdateTime(new Date());
@@ -237,15 +235,15 @@ public class AmzDepService {
 			amzDepartmentRespository.saveAll(amzDepList);
 			return amzDepList;
 		} catch (Exception e) {
-			log.error("处理根类目，异常。htmlFilePath="+htmlFilePath, e);
+			log.error("处理子类目，异常。param="+parentDep.toString(), e);
 			return null;
 		}
-	}*/
+	}
 	
-	private String getAmzDepId(String depUrl) {
+	private String getAmzRootDepId(String depUrl) {
 		try {
 			if(StrUtil.isBlank(depUrl)) {
-				log.error("通过dep url获取depId，depUrl为空。");
+				log.error("根类目通过dep url获取depId，depUrl为空。");
 				return null;
 			}
 			String[] paramArray = depUrl.split("&");
@@ -260,7 +258,45 @@ public class AmzDepService {
 			}
 			return null;
 		} catch (Exception e) {
-			log.error("通过dep url获取depId，异常。depUrl="+depUrl, e);
+			log.error("根类目通过dep url获取depId，异常。depUrl="+depUrl, e);
+			return null;
+		}
+	}
+	
+	private String getAmzSonDepId(String depUrl) {
+		try {
+			if(StrUtil.isBlank(depUrl)) {
+				log.error("子类目通过dep url获取depId，depUrl为空。");
+				return null;
+			}
+			//url示例：/s/ref=lp_16225011011_nr_n_0?fst=as:off&rh=i:kitchen-intl-ship,n:!16225011011,n:3206325011&bbn=16225011011&ie=UTF8&qid=1555152834&rnid=16225011011
+			Map<String, String> mapRequestParam = URLUtil.URLRequest(depUrl);
+			// rh示例：rh=i%3Akitchen-intl-ship%2Cn%3A%2116225011011%2Cn%3A3206325011
+			String rh = mapRequestParam.get("rh");
+			if(StrUtil.isBlank(rh)) {
+				log.error("子类目通过dep url获取depId，rh为空。depUrl="+depUrl);
+				return null;
+			}
+			// rh解码后示例：rh=i:kitchen-intl-ship,n:!16225011011,n:3206325011
+			String rhDe = URLDecoder.decode(rh, "utf-8");
+			String[] rhValue = rhDe.split(",");
+			for(String value : rhValue) {
+				// 不存在n:跳过
+				if(value.indexOf("n:") < 0) {
+					continue;
+				}
+				// 存在n:!也跳过
+				if(value.indexOf("n:!") > -1) {
+					continue;
+				}
+				
+				String depId = value.replace("n:", "");
+				return depId;
+			}
+			
+			return null;
+		} catch (Exception e) {
+			log.error("子类目通过dep url获取depId，异常。depUrl="+depUrl, e);
 			return null;
 		}
 	}
@@ -268,18 +304,18 @@ public class AmzDepService {
 	public static void main(String[] args) {
 		AmzDepartment amzDep = new AmzDepartment();
 		//long id = GetIncrementId.getInstance().getCount(systemConfig.getServerNode(), systemConfig.getAreaNode());
-		amzDep.setId(0L);
+		amzDep.setId(1389163537180000267L);
 		
-		//amzDep.setDepId(depId);
+		amzDep.setDepId("16225011011");
 
-		//amzDep.setShowNameCn(key);
-		//amzDep.setShowNameEn(key);
+		amzDep.setShowNameCn("Home & Kitchen");
+		amzDep.setShowNameEn("Home & Kitchen");
 
-		amzDep.setUrl("https://www.amazon.com/");
-		//amzDep.setUrlDomain(AMZConstant.AMZ_US_DOMAIN);
+		amzDep.setUrl("/s/browse?_encoding=UTF8&node=16225011011&ref_=nav_shopall-export_nav_mw_sbd_intl_kitchen");
+		amzDep.setUrlDomain(AMZConstant.AMZ_US_DOMAIN);
 		
 		// 设置为根目录
-		amzDep.setDepLevel(0);
+		amzDep.setDepLevel(1);
 		
 		amzDep.setParentId(0L);
 		amzDep.setParentDepId("0");
@@ -288,7 +324,8 @@ public class AmzDepService {
 		amzDep.setDepStatus(0);
 		
 		//amzDep.setDataSrcUrl(parentDep.getDataTarUrl());
-		amzDep.setDataTarUrl("F:\\study\\amz\\git\\pc_service\\page\\index.html");
+		//amzDep.setDataTarUrl("F:\\study\\amz\\git\\pc_service\\page\\index.html");
+		amzDep.setDataTarUrl("F:\\study\\amz\\git\\pc_service\\page\\amz_home_kitchen.html");
 		
 		//amzDep.setCreateTime(new Date());
 		//amzDep.setUpdateTime(new Date());
