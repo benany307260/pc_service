@@ -280,7 +280,12 @@ public class AmzDepService {
 			// rh解码后示例：rh=i:kitchen-intl-ship,n:!16225011011,n:3206325011
 			String rhDe = URLDecoder.decode(rh, "utf-8");
 			String[] rhValue = rhDe.split(",");
-			for(String value : rhValue) {
+			
+			// 取最后一个
+			String value = rhValue[rhValue.length-1];
+			String depId = value.replace("n:", "");
+			
+			/*for(String value : rhValue) {
 				// 不存在n:跳过
 				if(value.indexOf("n:") < 0) {
 					continue;
@@ -292,9 +297,9 @@ public class AmzDepService {
 				
 				String depId = value.replace("n:", "");
 				return depId;
-			}
+			}*/
 			
-			return null;
+			return depId;
 		} catch (Exception e) {
 			log.error("子类目通过dep url获取depId，异常。depUrl="+depUrl, e);
 			return null;
