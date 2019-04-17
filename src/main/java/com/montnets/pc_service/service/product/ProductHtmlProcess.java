@@ -1,6 +1,7 @@
 package com.montnets.pc_service.service.product;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +32,7 @@ public class ProductHtmlProcess {
 	 * @param htmlFilePath
 	 * @return
 	 */
-	public AmzProduct getDepsFromHtml(String htmlFilePath) {
+	public AmzProduct getProductFromHtml(String htmlFilePath) {
 		try
 		{
 		    Document doc = Jsoup.parse( new File(htmlFilePath) , "utf-8" );
@@ -415,9 +416,53 @@ public class ProductHtmlProcess {
 		}
 	}
 	
+	private String getASIN(Document doc) {
+		try {
+			Elements divEls = doc.select("div#detail-bullets");
+			if(divEls == null) {
+				return null;
+			}
+			Elements liEls = divEls.select("li");
+			if(liEls == null) {
+				return null;
+			}
+			
+			for(Element liEl : liEls) {
+				if(liEl == null) {
+					continue;
+				}
+				String liContent = liEl.text();
+				if(StrUtil.isBlank(liContent)) {
+					continue;
+				}
+				if(liContent.toLowerCase().indexOf("asin") < 0) {
+					continue;
+				}
+				String asin = liEl.ownText();
+				if(StrUtil.isBlank(asin)) {
+					return null;
+				}
+				return asin.trim();
+			}
+			return null;
+			
+		} catch (Exception e) {
+			log.error("获取产品ASIN，异常。", e);
+			return null;
+		}
+	}
+	
 	public static void main(String[] args) {
-		ProductHtmlProcess html = new ProductHtmlProcess();
-		String path = "F:\\study\\amz\\git\\pc_service\\page\\amz_home_kitchen.html";
-		html.getDepsFromHtml(path, "16225011011");
+		try {
+			ProductHtmlProcess html = new ProductHtmlProcess();
+			String path = "F:/study/amz/git/pc_service/page/product1.html";
+			Document doc = Jsoup.parse( new File(path) , "utf-8" );
+			String asin = html.getASIN(doc);
+			System.out.println(asin);
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
