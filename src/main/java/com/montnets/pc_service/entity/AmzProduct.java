@@ -1,7 +1,6 @@
 package com.montnets.pc_service.entity;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -33,8 +32,11 @@ public class AmzProduct implements Serializable {
 	@Column(name="CREATE_TIME")
 	private Date createTime;
 
-	@Column(name="DEP_ID")
-	private String depId;
+	@Column(name="FROM_DEP_ID")
+	private String fromDepId;
+	
+	@Column(name="FROM_DEP_JSON")
+	private String fromDepJson;
 
 	@Column(name="PROD_ASIN")
 	private String prodAsin;
@@ -52,13 +54,13 @@ public class AmzProduct implements Serializable {
 	private String prodName;
 
 	@Column(name="PROD_PRICE")
-	private BigDecimal prodPrice;
+	private Double prodPrice;
 
 	@Column(name="PROD_UPC")
 	private String prodUpc;
 
-	@Column(name="QANDA_NUM")
-	private Integer qandaNum;
+	@Column(name="ASK_NUM")
+	private Integer askNum;
 
 	@Column(name="REVIEW_AVG")
 	private Double reviewAvg;
@@ -82,9 +84,50 @@ public class AmzProduct implements Serializable {
 	@Column(name="UPDATE_TIME")
 	private Date updateTime;
 	
+	@Column(name="PROD_AMZCHOICE")
+	private Integer prodAmzchoice;
+	
+	@Column(name="AMZCHOICE_KEY")
+	private String amzchoiceKey;
+	
+	@Column(name="AMZCHOICE_KEY_URL")
+	private String amzchoiceKeyUrl;
+	
 	private List<AmzProductBsr> productBsrList;
 
 	public AmzProduct() {
+	}
+
+	public String getFromDepJson() {
+		return fromDepJson;
+	}
+
+	public void setFromDepJson(String fromDepJson) {
+		this.fromDepJson = fromDepJson;
+	}
+
+	public String getAmzchoiceKey() {
+		return amzchoiceKey;
+	}
+
+	public void setAmzchoiceKey(String amzchoiceKey) {
+		this.amzchoiceKey = amzchoiceKey;
+	}
+
+	public String getAmzchoiceKeyUrl() {
+		return amzchoiceKeyUrl;
+	}
+
+	public void setAmzchoiceKeyUrl(String amzchoiceKeyUrl) {
+		this.amzchoiceKeyUrl = amzchoiceKeyUrl;
+	}
+
+	public Integer getProdAmzchoice() {
+		return prodAmzchoice;
+	}
+
+	public void setProdAmzchoice(Integer prodAmzchoice) {
+		this.prodAmzchoice = prodAmzchoice;
 	}
 
 	public List<AmzProductBsr> getProductBsrList() {
@@ -119,12 +162,12 @@ public class AmzProduct implements Serializable {
 		this.createTime = createTime;
 	}
 
-	public String getDepId() {
-		return depId;
+	public String getFromDepId() {
+		return fromDepId;
 	}
 
-	public void setDepId(String depId) {
-		this.depId = depId;
+	public void setFromDepId(String fromDepId) {
+		this.fromDepId = fromDepId;
 	}
 
 	public String getProdAsin() {
@@ -167,11 +210,11 @@ public class AmzProduct implements Serializable {
 		this.prodName = prodName;
 	}
 
-	public BigDecimal getProdPrice() {
+	public Double getProdPrice() {
 		return prodPrice;
 	}
 
-	public void setProdPrice(BigDecimal prodPrice) {
+	public void setProdPrice(Double prodPrice) {
 		this.prodPrice = prodPrice;
 	}
 
@@ -183,12 +226,12 @@ public class AmzProduct implements Serializable {
 		this.prodUpc = prodUpc;
 	}
 
-	public Integer getQandaNum() {
-		return qandaNum;
+	public Integer getAskNum() {
+		return askNum;
 	}
 
-	public void setQandaNum(Integer qandaNum) {
-		this.qandaNum = qandaNum;
+	public void setAskNum(Integer askNum) {
+		this.askNum = askNum;
 	}
 
 	public Double getReviewAvg() {
