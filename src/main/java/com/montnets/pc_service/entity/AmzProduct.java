@@ -93,9 +93,31 @@ public class AmzProduct implements Serializable {
 	@Column(name="AMZCHOICE_KEY_URL")
 	private String amzchoiceKeyUrl;
 	
+	@Column(name="SHOP_NAME")
+	private String shopName;
+	
+	@Column(name="SHOP_URL")
+	private String shopUrl;
+	
 	private List<AmzProductBsr> productBsrList;
 
 	public AmzProduct() {
+	}
+
+	public String getShopName() {
+		return shopName;
+	}
+
+	public void setShopName(String shopName) {
+		this.shopName = shopName;
+	}
+
+	public String getShopUrl() {
+		return shopUrl;
+	}
+
+	public void setShopUrl(String shopUrl) {
+		this.shopUrl = shopUrl;
 	}
 
 	public String getFromDepJson() {

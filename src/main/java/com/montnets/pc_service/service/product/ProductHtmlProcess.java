@@ -45,11 +45,11 @@ public class ProductHtmlProcess {
 		    // 产品名称
 		    String title = selectForText(doc, "span#productTitle");
 		    product.setProdName(title);
-		    // 品牌
-		    String prodBrand = selectForText(doc, "a#bylineInfo");
-		    product.setProdBrand(prodBrand);
-		    String brandUrl = selectForAttr(doc, "a#bylineInfo", "href");
-		    product.setProdBrandUrl(brandUrl);
+		    // 店铺
+		    String shopName = selectForText(doc, "a#bylineInfo");
+		    product.setShopName(shopName);
+		    String shopUrl = selectForAttr(doc, "a#bylineInfo", "href");
+		    product.setShopUrl(shopUrl);
 		    // 评论数
 		    int reviewsNum = getReviewNum(doc);
 		    product.setReviewsNum(reviewsNum);
@@ -75,7 +75,9 @@ public class ProductHtmlProcess {
 		    // 产品所在类目列表json
 		    String fromDepJson = getFromDepListJson(depList);
 		    product.setFromDepJson(fromDepJson);
-		    
+		    // ASIN
+		    String asin = getASIN(doc);
+		    product.setProdAsin(asin);
 			
 		    
 		    return product;
@@ -208,6 +210,11 @@ public class ProductHtmlProcess {
 				return price;
 			}
 			
+			price = getPriceInPrice(doc);
+			if(price > 0) {
+				return price;
+			}
+			
 			return 0;
 			
 		} catch (Exception e) {
@@ -223,8 +230,9 @@ public class ProductHtmlProcess {
 	    		return 0;
 	    	}
 	    	
+	    	text = text.replace("$", "");
+	    	
 	    	text = text.trim();
-	    	text = text.substring(0, 1);
 	    	
 	    	Double price = Double.parseDouble(text);
 	    	return price;
@@ -298,12 +306,57 @@ public class ProductHtmlProcess {
 				return 0;
 			}
 			
-			String text = spanEls.text();
+			Element el = spanEls.first();
+			if(el == null) {
+				return 0;
+			}
+			
+			String text = el.text();
+			text = text.replace("$", "");
+	    	
 	    	text = text.trim();
-	    	text = text.substring(0, 1);
 	    	
 	    	Double price = Double.parseDouble(text);
 	    	return price;
+		} catch (Exception e) {
+			log.error("获取unqualified里的价格，异常。", e);
+			return 0;
+		}
+	}
+	
+	private double getPriceInPrice(Document doc) {
+		try {
+			Elements priceEls = doc.select("div#price");
+			if(priceEls == null) {
+				return 0;
+			}
+			Elements spanEls = priceEls.select("span");
+			if(spanEls == null) {
+				return 0;
+			}
+			
+			for(Element spanEl : spanEls) {
+				if(spanEl == null) {
+					continue;
+				}
+				String text = spanEl.text();
+				if(StrUtil.isBlank(text)) {
+					continue;
+				}
+				if(text.indexOf("$") < 0) {
+					continue;
+				}
+				text = text.replace("$", "");
+				text = text.trim();
+				if(StrUtil.isBlank(text)) {
+					continue;
+				}
+				
+				Double price = Double.parseDouble(text);
+				return price;
+			}
+	    	
+	    	return 0;
 		} catch (Exception e) {
 			log.error("获取unqualified里的价格，异常。", e);
 			return 0;
@@ -375,14 +428,14 @@ public class ProductHtmlProcess {
 			if(divEls == null) {
 				return null;
 			}
-			Elements ulEls = divEls.select("ul");
-			if(ulEls == null) {
+			Elements liEls = divEls.select("li");
+			if(liEls == null) {
 				return null;
 			}
 			
 			List<Map<String,String>> depList = new ArrayList<>();
 			
-			for(Element liEl : ulEls) {
+			for(Element liEl : liEls) {
 				Elements aEls = liEl.select("a");
 				if(aEls == null || aEls.size() < 1) {
 					continue;
@@ -416,7 +469,7 @@ public class ProductHtmlProcess {
 		}
 	}
 	
-	private String getASIN(Document doc) {
+	private String getASINInDetail_bullets(Document doc) {
 		try {
 			Elements divEls = doc.select("div#detail-bullets");
 			if(divEls == null) {
@@ -452,13 +505,152 @@ public class ProductHtmlProcess {
 		}
 	}
 	
+	private String getASIN(Document doc) {
+		String asin = getASINInDetailBullets(doc);
+		if(StrUtil.isNotBlank(asin)) {
+			return asin;
+		}
+		
+		asin = getASINInDetail_bullets(doc);
+		if(StrUtil.isNotBlank(asin)) {
+			return asin;
+		}
+		
+		asin = getASINInProdDetails(doc);
+		if(StrUtil.isNotBlank(asin)) {
+			return asin;
+		}
+		
+		return asin;
+	}
+	
+	private String getASINInDetailBullets(Document doc) {
+		try {
+			Elements divEls = doc.select("div#detailBullets");
+			if(divEls == null) {
+				return null;
+			}
+			Elements liEls = divEls.select("li");
+			if(liEls == null) {
+				return null;
+			}
+			
+			for(Element liEl : liEls) {
+				if(liEl == null) {
+					continue;
+				}
+				String liContent = liEl.text();
+				if(StrUtil.isBlank(liContent)) {
+					continue;
+				}
+				
+				String key = "asin";
+				int asinStrIndex = liContent.toLowerCase().indexOf(key);
+				
+				if(asinStrIndex < 0) {
+					continue;
+				}
+				asinStrIndex = asinStrIndex + key.length() + 1;
+				String asin = liContent.substring(asinStrIndex);
+				return asin.trim();
+			}
+			return null;
+			
+		} catch (Exception e) {
+			log.error("获取产品ASIN，异常。", e);
+			return null;
+		}
+	}
+	
+	private String getASINInProdDetails(Document doc) {
+		try {
+			Elements divEls = doc.select("div#prodDetails");
+			if(divEls == null) {
+				return null;
+			}
+			Elements liEls = divEls.select("tr");
+			if(liEls == null) {
+				return null;
+			}
+			
+			for(Element liEl : liEls) {
+				if(liEl == null) {
+					continue;
+				}
+				String liContent = liEl.text();
+				if(StrUtil.isBlank(liContent)) {
+					continue;
+				}
+				
+				String key = "asin";
+				int asinStrIndex = liContent.toLowerCase().indexOf(key);
+				
+				if(asinStrIndex < 0) {
+					continue;
+				}
+				asinStrIndex = asinStrIndex + key.length();
+				String asin = liContent.substring(asinStrIndex);
+				return asin.trim();
+			}
+			return null;
+			
+		} catch (Exception e) {
+			log.error("获取产品ASIN，异常。", e);
+			return null;
+		}
+	}
+	
 	public static void main(String[] args) {
 		try {
 			ProductHtmlProcess html = new ProductHtmlProcess();
-			String path = "F:/study/amz/git/pc_service/page/product1.html";
-			Document doc = Jsoup.parse( new File(path) , "utf-8" );
-			String asin = html.getASIN(doc);
-			System.out.println(asin);
+			String mkdir = "C:/Users/lenovo/git/pc_service/page/%s";
+			//String mkdir = "F:/study/amz/git/pc_service/page/%s";
+			
+			for(int i = 1; i <= 15; i++) {
+				//i=6;
+				String pageName = "product"+i+".html";
+				String path = String.format(mkdir, pageName);
+				Document doc = Jsoup.parse( new File(path) , "utf-8" );
+				
+				// 产品名称
+			    /*String title = html.selectForText(doc, "span#productTitle");
+			    System.out.println("title------"+title);*/
+			    
+				// asin
+				/*String asin = html.getASIN(doc);
+				System.out.println(pageName+"------"+asin);*/
+				
+				/*int reviewsNum = html.getReviewNum(doc);
+				System.out.println("reviewsNum------"+reviewsNum);*/
+				
+				// 问答数
+			    /*int askNum = html.getAskNum(doc);
+			    System.out.println("askNum------"+askNum);*/
+				
+				// 价格
+			    /*double price = html.getPrice(doc);
+			    System.out.println("price------"+price);*/
+				
+				// 产品所在类目ID
+			    /*List<Map<String,String>> depList = html.getFromDepList(doc);
+			    String fromDepId = html.getFromDepId(depList);
+			    String fromDepJson = html.getFromDepListJson(depList);
+			    System.out.println(pageName+"-----fromDepId------"+fromDepId+"------"+fromDepJson);*/
+				
+				// 店铺
+			    /*String shopName = html.selectForText(doc, "a#bylineInfo");
+			    String shopUrl = html.selectForAttr(doc, "a#bylineInfo", "href");
+			    System.out.println(pageName+"-----"+shopName+"------"+shopUrl);*/
+				
+				// amz精选
+			    int amzChoice = html.getAmzChoice(doc);
+			    // amz精选关键字
+			    String acKey = html.selectForText(doc, "span.ac-keyword-link");
+			    // amz精选关键字url
+			    String acKeyUrl = html.getAmzChoiceKeyUrl(doc);
+			    System.out.println(pageName+"-----"+amzChoice+"------"+acKey+"-----"+acKeyUrl);
+			    
+			}
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
