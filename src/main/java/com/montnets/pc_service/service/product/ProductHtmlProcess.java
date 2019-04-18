@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
+import com.montnets.pc_service.constant.AMZConstant;
 import com.montnets.pc_service.entity.AmzProduct;
 import com.montnets.pc_service.util.URLUtil;
 
@@ -93,6 +94,15 @@ public class ProductHtmlProcess {
 			product.setSellerName(sellerName);
 			String sellerUrl = getSellerUrl(sellInfoMap);
 			product.setSellerUrl(sellerUrl);
+			int sellerType = getSellerType(sellInfoMap);
+			product.setSellerType(sellerType);
+			// 物流
+			String fulfillName = getFulfillName(sellInfoMap);
+			product.setFulfillName(fulfillName);
+			String fulfillUrl = getFulfillUrl(sellInfoMap);
+			product.setFulfillUrl(fulfillUrl);
+			int fbaType = getFBAType(sellInfoMap);
+			product.setFbaType(fbaType);
 			
 		    
 		    return product;
@@ -771,6 +781,11 @@ public class ProductHtmlProcess {
 			return sellInfoMap;
 		}
 		
+		sellInfoMap = getSellInMerchant_text(doc);
+		if(sellInfoMap != null && sellInfoMap.size() > 0) {
+			return sellInfoMap;
+		}
+		
 		sellInfoMap = getSellInSns_availability(doc);
 		if(sellInfoMap != null && sellInfoMap.size() > 0) {
 			return sellInfoMap;
@@ -796,6 +811,9 @@ public class ProductHtmlProcess {
 			Element seller_aEl = aEls.get(0);
 			if(seller_aEl != null) {
 				String sellerName = seller_aEl.text();
+				if(StrUtil.isNotBlank(sellerName)) {
+					sellerName = sellerName.trim();
+				}
 				String sellerUrl = seller_aEl.attr("href");
 				
 				sellMap.put("sellerName", sellerName);
@@ -805,10 +823,42 @@ public class ProductHtmlProcess {
 			Element fulfill_aEl = aEls.get(1);
 			if(fulfill_aEl != null) {
 				String fulfillName = fulfill_aEl.text();
+				if(StrUtil.isNotBlank(fulfillName)) {
+					fulfillName = fulfillName.trim();
+				}
 				String fulfillUrl = fulfill_aEl.attr("href");
 				sellMap.put("fulfillName", fulfillName);
 				sellMap.put("fulfillUrl", fulfillUrl);
 			}
+			
+			return sellMap;
+		} catch (Exception e) {
+			log.error("获取卖家信息merchant-info，异常。", e);
+			return null;
+		}
+	}
+	
+	private Map<String,String> getSellInMerchant_text(Document doc) {
+		try {
+			Elements elements = doc.select("div#merchant-info");
+			if(elements == null) {
+				return null;
+			}
+			
+			String text = elements.text();
+			if(StrUtil.isBlank(text)) {
+				return null;
+			}
+			
+			text = text.trim();
+			text = text.toLowerCase();
+			if(text.indexOf(AMZConstant.AMZ_SELF_FBA_CONTENT.toLowerCase()) < 0) {
+				return null;
+			}
+			
+			Map<String,String> sellMap = new HashMap<>();
+			sellMap.put("sellerName", AMZConstant.AMZ_SELLER_SELF_NAME);
+			sellMap.put("fulfillName", AMZConstant.AMZ_FBA_NAME);
 			
 			return sellMap;
 		} catch (Exception e) {
@@ -831,14 +881,13 @@ public class ProductHtmlProcess {
 			
 			text = text.trim();
 			text = text.toLowerCase();
-			String key = "ships from and sold by amazon.com";
-			if(text.indexOf(key) < 0) {
+			if(text.indexOf(AMZConstant.AMZ_SELF_FBA_CONTENT.toLowerCase()) < 0) {
 				return null;
 			}
 			
 			Map<String,String> sellMap = new HashMap<>();
-			sellMap.put("sellerName", "amazon.com");
-			sellMap.put("fulfillName", "Fulfilled by Amazon");
+			sellMap.put("sellerName", AMZConstant.AMZ_SELLER_SELF_NAME);
+			sellMap.put("fulfillName", AMZConstant.AMZ_FBA_NAME);
 			
 			return sellMap;
 		} catch (Exception e) {
@@ -854,6 +903,29 @@ public class ProductHtmlProcess {
 		return sellInfoMap.get("sellerName");
 	}
 	
+	/**
+	 * 卖家类型
+	 * @param sellInfoMap
+	 * @return 卖家类型。0-普通第三方卖家；1-亚马逊自营
+	 */
+	private int getSellerType(Map<String,String> sellInfoMap) {
+		if(sellInfoMap == null || sellInfoMap.size() < 1) {
+			return 0;
+		}
+		
+		String sellerName = getSellerName(sellInfoMap);
+		if(StrUtil.isBlank(sellerName)) {
+			return 0;
+		}
+		
+		if(AMZConstant.AMZ_SELLER_SELF_NAME.toLowerCase().equals(sellerName.toLowerCase())) {
+			// 卖家类型。0-普通第三方卖家；1-亚马逊自营
+			return 1;
+		}
+		
+		return 0;
+	}
+	
 	private String getSellerUrl(Map<String,String> sellInfoMap) {
 		if(sellInfoMap == null || sellInfoMap.size() < 1) {
 			return null;
@@ -861,18 +933,48 @@ public class ProductHtmlProcess {
 		return sellInfoMap.get("sellerUrl");
 	}
 	
-	private String getFulfill(Map<String,String> sellInfoMap) {
+	private String getFulfillName(Map<String,String> sellInfoMap) {
 		if(sellInfoMap == null || sellInfoMap.size() < 1) {
 			return null;
 		}
 		return sellInfoMap.get("fulfillName");
 	}
 	
+	/**
+	 * 是否FBA
+	 * @param sellInfoMap
+	 * @return 是否FBA。0-否；1-是
+	 */
+	private int getFBAType(Map<String,String> sellInfoMap) {
+		if(sellInfoMap == null || sellInfoMap.size() < 1) {
+			return 0;
+		}
+		
+		String fulfillName = getFulfillName(sellInfoMap);
+		if(StrUtil.isBlank(fulfillName)) {
+			return 0;
+		}
+		
+		if(AMZConstant.AMZ_FBA_NAME.toLowerCase().equals(fulfillName.toLowerCase())) {
+			// 是否FBA。0-否；1-是
+			return 1;
+		}
+		
+		return 0;
+	}
+	
+	private String getFulfillUrl(Map<String,String> sellInfoMap) {
+		if(sellInfoMap == null || sellInfoMap.size() < 1) {
+			return null;
+		}
+		return sellInfoMap.get("fulfillUrl");
+	}
+	
 	public static void main(String[] args) {
 		try {
 			ProductHtmlProcess html = new ProductHtmlProcess();
-			String mkdir = "C:/Users/lenovo/git/pc_service/page/%s";
-			//String mkdir = "F:/study/amz/git/pc_service/page/%s";
+			//String mkdir = "C:/Users/lenovo/git/pc_service/page/%s";
+			String mkdir = "F:/study/amz/git/pc_service/page/%s";
 			
 			for(int i = 1; i <= 16; i++) {
 				//i=5;
@@ -933,8 +1035,10 @@ public class ProductHtmlProcess {
 				Map<String,String> sellInfoMap = html.getSellInfo(doc);
 				String sellerName = html.getSellerName(sellInfoMap);
 				String sellerUrl = html.getSellerUrl(sellInfoMap);
-				String fulfill = html.getFulfill(sellInfoMap);
-				System.out.println(pageName+"-----sellerName"+"----"+sellerName+"------"+sellerUrl+"-----"+fulfill);
+				int sellerType = html.getSellerType(sellInfoMap);
+				String fulfillName = html.getFulfillName(sellInfoMap);
+				int fbaType = html.getFBAType(sellInfoMap);
+				System.out.println(pageName+"---"+sellerName+"---"+fulfillName+"---"+sellerType+"---"+fbaType);
 				
 			}
 			

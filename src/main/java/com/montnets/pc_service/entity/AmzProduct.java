@@ -101,10 +101,43 @@ public class AmzProduct implements Serializable {
 	
 	@Column(name="SHOP_URL")
 	private String shopUrl;
+
+	@Column(name="FULFILL_NAME")
+	private String fulfillName;
+	
+	@Column(name="FULFILL_URL")
+	private String fulfillUrl;
+	
+	@Column(name="FBA_TYPE")
+	private Integer fbaType;
 	
 	private List<AmzProductBsr> productBsrList;
 
 	public AmzProduct() {
+	}
+
+	public String getFulfillName() {
+		return fulfillName;
+	}
+
+	public void setFulfillName(String fulfillName) {
+		this.fulfillName = fulfillName;
+	}
+
+	public String getFulfillUrl() {
+		return fulfillUrl;
+	}
+
+	public void setFulfillUrl(String fulfillUrl) {
+		this.fulfillUrl = fulfillUrl;
+	}
+
+	public Integer getFbaType() {
+		return fbaType;
+	}
+
+	public void setFbaType(Integer fbaType) {
+		this.fbaType = fbaType;
 	}
 
 	public String getBsrJson() {
