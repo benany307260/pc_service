@@ -27,6 +27,9 @@ public class AmzProduct implements Serializable {
 	private Long id;
 
 	private Integer bsr;
+	
+	@Column(name="BSR_JSON")
+	private String bsrJson;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="CREATE_TIME")
@@ -50,8 +53,8 @@ public class AmzProduct implements Serializable {
 	@Column(name="PROD_IMG_URL")
 	private String prodImgUrl;
 
-	@Column(name="PROD_NAME")
-	private String prodName;
+	@Column(name="PROD_TITLE")
+	private String prodTitle;
 
 	@Column(name="PROD_PRICE")
 	private Double prodPrice;
@@ -102,6 +105,14 @@ public class AmzProduct implements Serializable {
 	private List<AmzProductBsr> productBsrList;
 
 	public AmzProduct() {
+	}
+
+	public String getBsrJson() {
+		return bsrJson;
+	}
+
+	public void setBsrJson(String bsrJson) {
+		this.bsrJson = bsrJson;
 	}
 
 	public String getShopName() {
@@ -224,12 +235,12 @@ public class AmzProduct implements Serializable {
 		this.prodImgUrl = prodImgUrl;
 	}
 
-	public String getProdName() {
-		return prodName;
+	public String getProdTitle() {
+		return prodTitle;
 	}
 
-	public void setProdName(String prodName) {
-		this.prodName = prodName;
+	public void setProdTitle(String prodTitle) {
+		this.prodTitle = prodTitle;
 	}
 
 	public Double getProdPrice() {

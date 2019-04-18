@@ -42,9 +42,9 @@ public class ProductHtmlProcess {
 		    }
 		    
 		    AmzProduct product = new AmzProduct();
-		    // 产品名称
+		    // 产品标题
 		    String title = selectForText(doc, "span#productTitle");
-		    product.setProdName(title);
+		    product.setProdTitle(title);
 		    // 店铺
 		    String shopName = selectForText(doc, "a#bylineInfo");
 		    product.setShopName(shopName);
@@ -53,6 +53,9 @@ public class ProductHtmlProcess {
 		    // 评论数
 		    int reviewsNum = getReviewNum(doc);
 		    product.setReviewsNum(reviewsNum);
+		    // 评分星级
+		    double reviewAvg = getReviewAvg(doc);
+		    product.setReviewAvg(reviewAvg);
 		    // 问答数
 		    int askNum = getAskNum(doc);
 		    product.setAskNum(askNum);
@@ -78,6 +81,18 @@ public class ProductHtmlProcess {
 		    // ASIN
 		    String asin = getASIN(doc);
 		    product.setProdAsin(asin);
+		    // BSR
+		    List<Map<String,String>> bsrList = getBSRList(doc);
+		    int bsrNum = getBSRRootNum(bsrList);
+		    product.setBsr(bsrNum);
+		    String bsrJson = getBSRJson(bsrList);
+		    product.setBsrJson(bsrJson);
+		    // Seller
+			Map<String,String> sellInfoMap = getSellInfo(doc);
+			String sellerName = getSellerName(sellInfoMap);
+			product.setSellerName(sellerName);
+			String sellerUrl = getSellerUrl(sellInfoMap);
+			product.setSellerUrl(sellerUrl);
 			
 		    
 		    return product;
@@ -568,16 +583,16 @@ public class ProductHtmlProcess {
 			if(divEls == null) {
 				return null;
 			}
-			Elements liEls = divEls.select("tr");
-			if(liEls == null) {
+			Elements trEls = divEls.select("tr");
+			if(trEls == null) {
 				return null;
 			}
 			
-			for(Element liEl : liEls) {
-				if(liEl == null) {
+			for(Element trEl : trEls) {
+				if(trEl == null) {
 					continue;
 				}
-				String liContent = liEl.text();
+				String liContent = trEl.text();
 				if(StrUtil.isBlank(liContent)) {
 					continue;
 				}
@@ -600,14 +615,267 @@ public class ProductHtmlProcess {
 		}
 	}
 	
+	private int getBSRRootNum(List<Map<String,String>> bsrList) {
+		if(bsrList == null || bsrList.size() < 1) {
+			return 0;
+		}
+		
+		try {
+			Map<String,String> bsrMap = bsrList.get(0);
+			if(bsrMap == null || bsrMap.size() < 1) {
+				return 0;
+			}
+			
+			String bsrNumStr = bsrMap.get("bsrNum");
+			if(StrUtil.isBlank(bsrNumStr)) {
+				return 0;
+			}
+			
+			int bsrNum = Integer.parseInt(bsrNumStr);
+			return bsrNum;
+		} catch (Exception e) {
+			log.error("获取BSR大类排名，异常。", e);
+			return 0;
+		}
+	}
+	
+	private String getBSRJson(List<Map<String,String>> bsrList) {
+		if(bsrList == null || bsrList.size() < 1) {
+			return null;
+		}
+		
+		try {
+			String json = JSON.toJSONString(bsrList);
+			return json;
+		} catch (Exception e) {
+			log.error("获取BSR JSON，异常。", e);
+			return null;
+		}
+	}
+	
+	private List<Map<String,String>> getBSRList(Document doc) {
+		
+		List<Map<String,String>> bsrList = getBSRListInTable(doc);
+		if(bsrList != null && bsrList.size() > 0) {
+			return bsrList;
+		}
+		
+		return null;
+	}
+	
+	private List<Map<String,String>> getBSRListInTable(Document doc) {
+		try {
+			Elements divEls = doc.select("table#productDetails_detailBullets_sections1");
+			if(divEls == null) {
+				return null;
+			}
+			Elements trEls = divEls.select("tr");
+			if(trEls == null) {
+				return null;
+			}
+			
+			Elements bsrSpanEls = null;
+					
+			for(Element trEl : trEls) {
+				if(trEl == null) {
+					continue;
+				}
+				String trText = trEl.text();
+				if(StrUtil.isBlank(trText)) {
+					continue;
+				}
+				
+				String key = "best sellers rank";
+				int keyIndex = trText.toLowerCase().indexOf(key);
+				if(keyIndex < 0) {
+					continue;
+				}
+				
+				bsrSpanEls = trEl.select("span");
+				if(bsrSpanEls != null) {
+					break;
+				}
+			}
+			
+			if(bsrSpanEls == null) {
+				return null;
+			}
+			
+			List<Map<String,String>> bsrList = new ArrayList<>();
+			
+			for(Element bsrSpanEl : bsrSpanEls) {
+				if(bsrSpanEl == null) {
+					continue;
+				}
+				String text = bsrSpanEl.text();
+				if(StrUtil.isBlank(text)) {
+					continue;
+				}
+				text = text.trim();
+				String bsrNumStr = text.substring(1, text.indexOf("in"));
+				if(StrUtil.isBlank(bsrNumStr)) {
+					continue;
+				}
+				bsrNumStr = bsrNumStr.trim().replace(",", "");
+				
+				Elements aEls = bsrSpanEl.select("a");
+				if(aEls == null) {
+					continue;
+				}
+				Element aEl = aEls.first();
+				if(aEl == null) {
+					continue;
+				}
+				String bsrDepUrl = aEl.attr("href");
+				String bsrDepName = aEl.text();
+				
+				Map<String,String> bsrMap = new HashMap<>();
+				bsrMap.put("bsrNum", bsrNumStr);
+				bsrMap.put("bsrDepUrl", bsrDepUrl);
+				bsrMap.put("bsrDepName", bsrDepName);
+				bsrList.add(bsrMap);
+			}
+			
+			return bsrList;
+			
+		} catch (Exception e) {
+			log.error("获取产品BSR，异常。", e);
+			return null;
+		}
+	}
+	
+	private double getReviewAvg(Document doc) {
+		try {
+	    	String titleValue = selectForAttr(doc, "span#acrPopover", "title");
+	    	if(StrUtil.isBlank(titleValue)) {
+	    		return 0;
+	    	}
+	    	
+	    	titleValue = titleValue.substring(0, titleValue.indexOf(" "));
+	    	titleValue = titleValue.trim();
+	    	if(StrUtil.isBlank(titleValue)) {
+	    		return 0;
+	    	}
+	    	
+	    	double reviewAvg = Double.parseDouble(titleValue);
+	    	return reviewAvg;
+		} catch (Exception e) {
+			log.error("获取产品评分星级，异常。", e);
+			return 0;
+		}
+	}
+	
+	private Map<String,String> getSellInfo(Document doc) {
+		Map<String,String> sellInfoMap = getSellInMerchant_info(doc);
+		if(sellInfoMap != null && sellInfoMap.size() > 0) {
+			return sellInfoMap;
+		}
+		
+		sellInfoMap = getSellInSns_availability(doc);
+		if(sellInfoMap != null && sellInfoMap.size() > 0) {
+			return sellInfoMap;
+		}
+		
+		return null;
+	}
+	
+	private Map<String,String> getSellInMerchant_info(Document doc) {
+		try {
+			Elements elements = doc.select("div#merchant-info");
+			if(elements == null) {
+				return null;
+			}
+			
+			Elements aEls = elements.select("a");
+			if(aEls == null || aEls.size() < 2) {
+				return null;
+			}
+			
+			Map<String,String> sellMap = new HashMap<>();
+			
+			Element seller_aEl = aEls.get(0);
+			if(seller_aEl != null) {
+				String sellerName = seller_aEl.text();
+				String sellerUrl = seller_aEl.attr("href");
+				
+				sellMap.put("sellerName", sellerName);
+				sellMap.put("sellerUrl", sellerUrl);
+			}
+			
+			Element fulfill_aEl = aEls.get(1);
+			if(fulfill_aEl != null) {
+				String fulfillName = fulfill_aEl.text();
+				String fulfillUrl = fulfill_aEl.attr("href");
+				sellMap.put("fulfillName", fulfillName);
+				sellMap.put("fulfillUrl", fulfillUrl);
+			}
+			
+			return sellMap;
+		} catch (Exception e) {
+			log.error("获取卖家信息merchant-info，异常。", e);
+			return null;
+		}
+	}
+	
+	private Map<String,String> getSellInSns_availability(Document doc) {
+		try {
+			Elements elements = doc.select("div#sns-availability");
+			if(elements == null) {
+				return null;
+			}
+			
+			String text = elements.text();
+			if(StrUtil.isBlank(text)) {
+				return null;
+			}
+			
+			text = text.trim();
+			text = text.toLowerCase();
+			String key = "ships from and sold by amazon.com";
+			if(text.indexOf(key) < 0) {
+				return null;
+			}
+			
+			Map<String,String> sellMap = new HashMap<>();
+			sellMap.put("sellerName", "amazon.com");
+			sellMap.put("fulfillName", "Fulfilled by Amazon");
+			
+			return sellMap;
+		} catch (Exception e) {
+			log.error("获取卖家信息sns-availability，异常。", e);
+			return null;
+		}
+	}
+	
+	private String getSellerName(Map<String,String> sellInfoMap) {
+		if(sellInfoMap == null || sellInfoMap.size() < 1) {
+			return null;
+		}
+		return sellInfoMap.get("sellerName");
+	}
+	
+	private String getSellerUrl(Map<String,String> sellInfoMap) {
+		if(sellInfoMap == null || sellInfoMap.size() < 1) {
+			return null;
+		}
+		return sellInfoMap.get("sellerUrl");
+	}
+	
+	private String getFulfill(Map<String,String> sellInfoMap) {
+		if(sellInfoMap == null || sellInfoMap.size() < 1) {
+			return null;
+		}
+		return sellInfoMap.get("fulfillName");
+	}
+	
 	public static void main(String[] args) {
 		try {
 			ProductHtmlProcess html = new ProductHtmlProcess();
 			String mkdir = "C:/Users/lenovo/git/pc_service/page/%s";
 			//String mkdir = "F:/study/amz/git/pc_service/page/%s";
 			
-			for(int i = 1; i <= 15; i++) {
-				//i=6;
+			for(int i = 1; i <= 16; i++) {
+				//i=5;
 				String pageName = "product"+i+".html";
 				String path = String.format(mkdir, pageName);
 				Document doc = Jsoup.parse( new File(path) , "utf-8" );
@@ -620,8 +888,13 @@ public class ProductHtmlProcess {
 				/*String asin = html.getASIN(doc);
 				System.out.println(pageName+"------"+asin);*/
 				
+				// 评论数
 				/*int reviewsNum = html.getReviewNum(doc);
 				System.out.println("reviewsNum------"+reviewsNum);*/
+				
+				// 评分星级
+				/*double reviewAvg = html.getReviewAvg(doc);
+				System.out.println(pageName+"----reviewAvg-----"+reviewAvg);*/
 				
 				// 问答数
 			    /*int askNum = html.getAskNum(doc);
@@ -643,13 +916,26 @@ public class ProductHtmlProcess {
 			    System.out.println(pageName+"-----"+shopName+"------"+shopUrl);*/
 				
 				// amz精选
-			    int amzChoice = html.getAmzChoice(doc);
+			    /*int amzChoice = html.getAmzChoice(doc);
 			    // amz精选关键字
 			    String acKey = html.selectForText(doc, "span.ac-keyword-link");
 			    // amz精选关键字url
 			    String acKeyUrl = html.getAmzChoiceKeyUrl(doc);
-			    System.out.println(pageName+"-----"+amzChoice+"------"+acKey+"-----"+acKeyUrl);
+			    System.out.println(pageName+"-----"+amzChoice+"------"+acKey+"-----"+acKeyUrl);*/
 			    
+				// BSR
+				/*List<Map<String,String>> bsrList = html.getBSRList(doc);
+				int bsrRoot = html.getBSRRootNum(bsrList);
+				String bsrJson = html.getBSRJson(bsrList);
+				System.out.println(pageName+"-----bsrRoot"+"----"+bsrRoot+"------"+bsrJson);*/
+				
+				// Seller
+				Map<String,String> sellInfoMap = html.getSellInfo(doc);
+				String sellerName = html.getSellerName(sellInfoMap);
+				String sellerUrl = html.getSellerUrl(sellInfoMap);
+				String fulfill = html.getFulfill(sellInfoMap);
+				System.out.println(pageName+"-----sellerName"+"----"+sellerName+"------"+sellerUrl+"-----"+fulfill);
+				
 			}
 			
 		} catch (IOException e) {
