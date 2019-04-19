@@ -909,6 +909,11 @@ public class ProductHtmlProcess {
 			return sellInfoMap;
 		}
 		
+		sellInfoMap = getSellInusedbuyBox(doc);
+		if(sellInfoMap != null && sellInfoMap.size() > 0) {
+			return sellInfoMap;
+		}
+		
 		return null;
 	}
 	
@@ -1014,6 +1019,63 @@ public class ProductHtmlProcess {
 		}
 	}
 	
+	private Map<String,String> getSellInusedbuyBox(Document doc) {
+		try {
+			Elements divEls = doc.select("div#usedbuyBox div");
+			if(divEls == null || divEls.size() < 1) {
+				return null;
+			}
+			
+			Map<String,String> sellMap = new HashMap<>();
+			
+			for(Element div : divEls) {
+				if(div == null) {
+					continue;
+				}
+				String text = div.ownText();
+				if(StrUtil.isBlank(text)) {
+					continue;
+				}
+				
+				if(text.toLowerCase().indexOf("sold by") < 0) {
+					continue;
+				}
+				
+				Elements aEls = div.select("a");
+				if(aEls == null) {
+					continue;
+				}
+				String sellerName = aEls.text();
+				if(StrUtil.isBlank(sellerName)) {
+					continue;
+				}
+				sellerName = sellerName.trim();
+				
+				String sellerUrl = aEls.attr("href");
+				
+				sellMap.put("sellerName", sellerName); 
+				sellMap.put("sellerUrl", sellerUrl);
+				break;
+			}
+			
+			Elements aEls = doc.select("a#SSOFpopoverLink_ubb");
+			if(aEls == null) {
+				return sellMap;
+			}
+			
+			String fulfillName = aEls.text();
+			String fulfillUrl = aEls.attr("href");
+			
+			sellMap.put("fulfillName", fulfillName);
+			sellMap.put("fulfillUrl", fulfillUrl);
+			
+			return sellMap;
+		} catch (Exception e) {
+			log.error("获取卖家信息usedbuyBox，异常。", e);
+			return null;
+		}
+	}
+	
 	private String getSellerName(Map<String,String> sellInfoMap) {
 		if(sellInfoMap == null || sellInfoMap.size() < 1) {
 			return null;
@@ -1094,8 +1156,8 @@ public class ProductHtmlProcess {
 			String mkdir = "C:/Users/lenovo/git/pc_service/page/%s";
 			//String mkdir = "F:/study/amz/git/pc_service/page/%s";
 			
-			for(int i = 1; i <= 17; i++) {
-				//i=1;
+			for(int i = 1; i <= 25; i++) {
+				//i=22;
 				String pageName = "product"+i+".html";
 				String path = String.format(mkdir, pageName);
 				Document doc = Jsoup.parse( new File(path) , "utf-8" );
