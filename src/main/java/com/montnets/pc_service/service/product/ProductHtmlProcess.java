@@ -706,34 +706,91 @@ public class ProductHtmlProcess {
 					continue;
 				}
 				
-				bsrSpanEls = trEl.select("span");
+				bsrSpanEls = trEl.select("span span");
 				if(bsrSpanEls != null) {
 					break;
 				}
 			}
 			
-			if(bsrSpanEls == null) {
+			if(bsrSpanEls == null || bsrSpanEls.size() < 1) {
 				return null;
 			}
 			
 			List<Map<String,String>> bsrList = new ArrayList<>();
 			
-			for(Element bsrSpanEl : bsrSpanEls) {
+			Element bsrRootSpanEl = bsrSpanEls.get(0);
+			if(bsrRootSpanEl == null) {
+				return null;
+			}
+			String text = bsrRootSpanEl.ownText();
+			if(StrUtil.isBlank(text)) {
+				return null;
+			}
+			text = text.trim();
+			
+			int beginIndex = text.indexOf("#");
+			if(beginIndex < 0) {
+				return null;
+			}
+			beginIndex +=1;
+			String inKey = "in";
+			int inIndex = text.indexOf(inKey);
+			if(inIndex < 0) {
+				return null;
+			}
+			
+			String bsrNumStr = text.substring(beginIndex, inIndex);
+			if(StrUtil.isBlank(bsrNumStr)) {
+				return null;
+			}
+			bsrNumStr = bsrNumStr.trim().replace(",", "");
+			
+			String bsrDepName = text.substring(inIndex+inKey.length(), text.indexOf("("));
+			bsrDepName = bsrDepName.trim();
+			
+			String bsrDepUrl = null;
+			Elements aEls = bsrRootSpanEl.select("a");
+			if(aEls != null) {
+				Element aEl = aEls.first();
+				if(aEl != null) {
+					bsrDepUrl = aEl.attr("href");
+				}
+			}
+			Map<String,String> bsrMap = new HashMap<>();
+			bsrMap.put("bsrNum", bsrNumStr);
+			bsrMap.put("bsrDepUrl", bsrDepUrl);
+			bsrMap.put("bsrDepName", bsrDepName);
+			bsrList.add(bsrMap);
+			
+			for(int i = 1; i < bsrSpanEls.size(); i++)
+			{
+				Element bsrSpanEl = bsrSpanEls.get(i);
 				if(bsrSpanEl == null) {
 					continue;
 				}
-				String text = bsrSpanEl.text();
+				text = bsrSpanEl.ownText();
 				if(StrUtil.isBlank(text)) {
 					continue;
 				}
 				text = text.trim();
-				String bsrNumStr = text.substring(1, text.indexOf("in"));
+				
+				beginIndex = text.indexOf("#");
+				if(beginIndex < 0) {
+					continue;
+				}
+				beginIndex +=1;
+				inIndex = text.indexOf(inKey);
+				if(inIndex < 0) {
+					continue;
+				}
+				
+				bsrNumStr = text.substring(beginIndex, inIndex);
 				if(StrUtil.isBlank(bsrNumStr)) {
 					continue;
 				}
 				bsrNumStr = bsrNumStr.trim().replace(",", "");
 				
-				Elements aEls = bsrSpanEl.select("a");
+				aEls = bsrSpanEl.select("a");
 				if(aEls == null) {
 					continue;
 				}
@@ -741,10 +798,10 @@ public class ProductHtmlProcess {
 				if(aEl == null) {
 					continue;
 				}
-				String bsrDepUrl = aEl.attr("href");
-				String bsrDepName = aEl.text();
+				bsrDepUrl = aEl.attr("href");
+				bsrDepName = aEl.text();
 				
-				Map<String,String> bsrMap = new HashMap<>();
+				bsrMap = new HashMap<>();
 				bsrMap.put("bsrNum", bsrNumStr);
 				bsrMap.put("bsrDepUrl", bsrDepUrl);
 				bsrMap.put("bsrDepName", bsrDepName);
@@ -1153,11 +1210,11 @@ public class ProductHtmlProcess {
 	public static void main(String[] args) {
 		try {
 			ProductHtmlProcess html = new ProductHtmlProcess();
-			String mkdir = "C:/Users/lenovo/git/pc_service/page/%s";
-			//String mkdir = "F:/study/amz/git/pc_service/page/%s";
+			//String mkdir = "C:/Users/lenovo/git/pc_service/page/%s";
+			String mkdir = "F:/study/amz/git/pc_service/page/%s";
 			
 			for(int i = 1; i <= 25; i++) {
-				//i=22;
+				//i=11;
 				String pageName = "product"+i+".html";
 				String path = String.format(mkdir, pageName);
 				Document doc = Jsoup.parse( new File(path) , "utf-8" );
