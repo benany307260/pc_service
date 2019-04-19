@@ -670,6 +670,11 @@ public class ProductHtmlProcess {
 			return bsrList;
 		}
 		
+		bsrList = getBSRListInSalesRank(doc);
+		if(bsrList != null && bsrList.size() > 0) {
+			return bsrList;
+		}
+		
 		return null;
 	}
 	
@@ -743,6 +748,119 @@ public class ProductHtmlProcess {
 				bsrMap.put("bsrNum", bsrNumStr);
 				bsrMap.put("bsrDepUrl", bsrDepUrl);
 				bsrMap.put("bsrDepName", bsrDepName);
+				bsrList.add(bsrMap);
+			}
+			
+			return bsrList;
+			
+		} catch (Exception e) {
+			log.error("获取产品BSR，异常。", e);
+			return null;
+		}
+	}
+	
+	private List<Map<String,String>> getBSRListInSalesRank(Document doc) {
+		try {
+			Elements liEls = doc.select("li#SalesRank");
+			if(liEls == null) {
+				return null;
+			}
+			String liText = liEls.text();
+			if(StrUtil.isBlank(liText)) {
+				return null;
+			}
+			
+			int bsrBeginIndex = liText.indexOf("#");
+			if(bsrBeginIndex < 0) {
+				return null;
+			}
+			bsrBeginIndex +=1;
+			
+			String key = "in";
+			int bsrEndIndex = liText.indexOf(key);
+			if(bsrEndIndex < 0) {
+				return null;
+			}
+			
+			String bsrNumStr = liText.substring(bsrBeginIndex, liText.indexOf(key));
+			bsrNumStr = bsrNumStr.trim();
+			if(StrUtil.isBlank(bsrNumStr)) {
+				return null;
+			}
+			bsrNumStr = bsrNumStr.trim().replace(",", "");
+			
+			int bsrDepEndIndex = liText.indexOf("(");
+			if(bsrEndIndex < 0) {
+				return null;
+			}
+			String bsrDepName = liText.substring(bsrEndIndex+key.length(), bsrDepEndIndex);
+			bsrDepName = bsrDepName.trim();
+			if(StrUtil.isBlank(bsrDepName)) {
+				return null;
+			}
+			
+			String bsrDepUrl = null;
+			Elements aEls = liEls.select("a");
+			if(aEls != null) {
+				Element aEl = aEls.first();
+				if(aEl != null) {
+					bsrDepUrl = aEl.attr("href");
+				}
+			}
+			
+			List<Map<String,String>> bsrList = new ArrayList<>();
+			Map<String,String> bsrMap = new HashMap<>();
+			bsrMap.put("bsrNum", bsrNumStr);
+			bsrMap.put("bsrDepName", bsrDepName);
+			bsrMap.put("bsrDepUrl", bsrDepUrl);
+			bsrList.add(bsrMap);
+			
+			Elements bsrLiEls = liEls.select("li li");
+			if(bsrLiEls == null || bsrLiEls.size() < 1) {
+				return bsrList;
+			}
+			
+			for(Element li : bsrLiEls) {
+				if(li == null) {
+					continue;
+				}
+				String text = li.text();
+				if(StrUtil.isBlank(text)) {
+					continue;
+				}
+				
+				bsrBeginIndex = text.indexOf("#");
+				if(bsrBeginIndex < 0) {
+					continue;
+				}
+				bsrBeginIndex +=1;
+				
+				//String key = "in";
+				bsrEndIndex = text.indexOf(key);
+				if(bsrEndIndex < 0) {
+					continue;
+				}
+				
+				bsrNumStr = text.substring(bsrBeginIndex, bsrEndIndex);
+				bsrNumStr = bsrNumStr.trim();
+				if(StrUtil.isBlank(bsrNumStr)) {
+					continue;
+				}
+				bsrNumStr = bsrNumStr.trim().replace(",", "");
+				
+				Elements bsrAEls = li.select("a");
+				if(bsrAEls != null) {
+					Element aEl = bsrAEls.first();
+					if(aEl != null) {
+						bsrDepUrl = aEl.attr("href");
+						bsrDepName = aEl.text();
+					}
+				}
+				
+				bsrMap = new HashMap<>();
+				bsrMap.put("bsrNum", bsrNumStr);
+				bsrMap.put("bsrDepName", bsrDepName);
+				bsrMap.put("bsrDepUrl", bsrDepUrl);
 				bsrList.add(bsrMap);
 			}
 			
@@ -973,11 +1091,11 @@ public class ProductHtmlProcess {
 	public static void main(String[] args) {
 		try {
 			ProductHtmlProcess html = new ProductHtmlProcess();
-			//String mkdir = "C:/Users/lenovo/git/pc_service/page/%s";
-			String mkdir = "F:/study/amz/git/pc_service/page/%s";
+			String mkdir = "C:/Users/lenovo/git/pc_service/page/%s";
+			//String mkdir = "F:/study/amz/git/pc_service/page/%s";
 			
-			for(int i = 1; i <= 16; i++) {
-				//i=5;
+			for(int i = 1; i <= 17; i++) {
+				//i=1;
 				String pageName = "product"+i+".html";
 				String path = String.format(mkdir, pageName);
 				Document doc = Jsoup.parse( new File(path) , "utf-8" );
@@ -1026,19 +1144,19 @@ public class ProductHtmlProcess {
 			    System.out.println(pageName+"-----"+amzChoice+"------"+acKey+"-----"+acKeyUrl);*/
 			    
 				// BSR
-				/*List<Map<String,String>> bsrList = html.getBSRList(doc);
+				List<Map<String,String>> bsrList = html.getBSRList(doc);
 				int bsrRoot = html.getBSRRootNum(bsrList);
 				String bsrJson = html.getBSRJson(bsrList);
-				System.out.println(pageName+"-----bsrRoot"+"----"+bsrRoot+"------"+bsrJson);*/
+				System.out.println(pageName+"---"+bsrRoot+"---"+bsrJson);
 				
 				// Seller
-				Map<String,String> sellInfoMap = html.getSellInfo(doc);
+				/*Map<String,String> sellInfoMap = html.getSellInfo(doc);
 				String sellerName = html.getSellerName(sellInfoMap);
 				String sellerUrl = html.getSellerUrl(sellInfoMap);
 				int sellerType = html.getSellerType(sellInfoMap);
 				String fulfillName = html.getFulfillName(sellInfoMap);
 				int fbaType = html.getFBAType(sellInfoMap);
-				System.out.println(pageName+"---"+sellerName+"---"+fulfillName+"---"+sellerType+"---"+fbaType);
+				System.out.println(pageName+"---"+sellerName+"---"+fulfillName+"---"+sellerType+"---"+fbaType);*/
 				
 			}
 			
