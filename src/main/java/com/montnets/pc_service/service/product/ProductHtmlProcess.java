@@ -1240,14 +1240,14 @@ public class ProductHtmlProcess {
 			    System.out.println("askNum------"+askNum);*/
 				
 				// 价格
-			    /*double price = html.getPrice(doc);
-			    System.out.println("price------"+price);*/
+			    double price = html.getPrice(doc);
+			    System.out.println(pageName+"---"+price);
 				
 				// 产品所在类目ID
 			    /*List<Map<String,String>> depList = html.getFromDepList(doc);
 			    String fromDepId = html.getFromDepId(depList);
 			    String fromDepJson = html.getFromDepListJson(depList);
-			    System.out.println(pageName+"-----fromDepId------"+fromDepId+"------"+fromDepJson);*/
+			    System.out.println(pageName+"---"+fromDepId+"---"+fromDepJson);*/
 				
 				// 店铺
 			    /*String shopName = html.selectForText(doc, "a#bylineInfo");
@@ -1260,13 +1260,13 @@ public class ProductHtmlProcess {
 			    String acKey = html.selectForText(doc, "span.ac-keyword-link");
 			    // amz精选关键字url
 			    String acKeyUrl = html.getAmzChoiceKeyUrl(doc);
-			    System.out.println(pageName+"-----"+amzChoice+"------"+acKey+"-----"+acKeyUrl);*/
+			    System.out.println(pageName+"---"+amzChoice+"---"+acKey+"---"+acKeyUrl);*/
 			    
 				// BSR
-				List<Map<String,String>> bsrList = html.getBSRList(doc);
+				/*List<Map<String,String>> bsrList = html.getBSRList(doc);
 				int bsrRoot = html.getBSRRootNum(bsrList);
 				String bsrJson = html.getBSRJson(bsrList);
-				System.out.println(pageName+"---"+bsrRoot+"---"+bsrJson);
+				System.out.println(pageName+"---"+bsrRoot+"---"+bsrJson);*/
 				
 				// Seller
 				/*Map<String,String> sellInfoMap = html.getSellInfo(doc);
