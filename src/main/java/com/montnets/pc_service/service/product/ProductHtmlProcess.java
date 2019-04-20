@@ -43,9 +43,15 @@ public class ProductHtmlProcess {
 		    }
 		    
 		    AmzProduct product = new AmzProduct();
+		    // ASIN
+		    String asin = getASIN(doc);
+		    product.setProdAsin(asin);
 		    // 产品标题
 		    String title = selectForText(doc, "span#productTitle");
 		    product.setProdTitle(title);
+		    // 价格
+		    double price = getPrice(doc);
+		    product.setProdPrice(price);
 		    // 店铺
 		    String shopName = selectForText(doc, "a#bylineInfo");
 		    product.setShopName(shopName);
@@ -69,9 +75,6 @@ public class ProductHtmlProcess {
 		    // amz精选关键字url
 		    String acKeyUrl = getAmzChoiceKeyUrl(doc);
 		    product.setAmzchoiceKeyUrl(acKeyUrl);
-		    // 价格
-		    double price = getPrice(doc);
-		    product.setProdPrice(price);
 		    // 产品所在类目ID
 		    List<Map<String,String>> depList = getFromDepList(doc);
 		    String fromDepId = getFromDepId(depList);
@@ -79,9 +82,6 @@ public class ProductHtmlProcess {
 		    // 产品所在类目列表json
 		    String fromDepJson = getFromDepListJson(depList);
 		    product.setFromDepJson(fromDepJson);
-		    // ASIN
-		    String asin = getASIN(doc);
-		    product.setProdAsin(asin);
 		    // BSR
 		    List<Map<String,String>> bsrList = getBSRList(doc);
 		    int bsrNum = getBSRRootNum(bsrList);
@@ -257,10 +257,38 @@ public class ProductHtmlProcess {
 	    	
 	    	text = text.replace("$", "");
 	    	
-	    	text = text.trim();
 	    	
-	    	Double price = Double.parseDouble(text);
-	    	return price;
+	    	List<Double> priceList = new ArrayList<>();
+
+	    	String key = "-";
+	    	/*int index = text.indexOf(key);
+	    	if(index < 0) {
+	    		text = text.substring(0, index);
+	    		text = text.trim();
+	    		Double price = Double.parseDouble(text);
+	    		priceList.add(price);
+	    		return priceList;
+	    	}*/
+	    	
+	    	String[] priceStrArray = text.split(key);
+	    	if(priceStrArray == null || priceStrArray.length < 1) {
+	    		return 0;
+	    	}
+	    	
+	    	for(String priceStr : priceStrArray) {
+	    		if(StrUtil.isBlank(priceStr)) {
+	    			continue;
+	    		}
+	    		priceStr = priceStr.trim();
+	    		Double price = Double.parseDouble(priceStr);
+	    		priceList.add(price);
+	    	}
+	    	
+	    	if(priceList.size() > 0) {
+	    		return priceList.get(0);
+	    	}
+	    	
+	    	return 0;
 		} catch (Exception e) {
 			log.error("获取priceblock_ourprice里的价格，异常。", e);
 			return 0;
@@ -1221,27 +1249,27 @@ public class ProductHtmlProcess {
 				
 				// 产品名称
 			    /*String title = html.selectForText(doc, "span#productTitle");
-			    System.out.println("title------"+title);*/
+			    System.out.println(pageName+"---"+title);*/
 			    
 				// asin
 				/*String asin = html.getASIN(doc);
-				System.out.println(pageName+"------"+asin);*/
+				System.out.println(pageName+"---"+asin);*/
 				
 				// 评论数
 				/*int reviewsNum = html.getReviewNum(doc);
-				System.out.println("reviewsNum------"+reviewsNum);*/
+				System.out.println(pageName+"---"+reviewsNum);*/
 				
 				// 评分星级
 				/*double reviewAvg = html.getReviewAvg(doc);
-				System.out.println(pageName+"----reviewAvg-----"+reviewAvg);*/
+				System.out.println(pageName+"---"+reviewAvg);*/
 				
 				// 问答数
 			    /*int askNum = html.getAskNum(doc);
-			    System.out.println("askNum------"+askNum);*/
+			    System.out.println(pageName+"---"+askNum);*/
 				
 				// 价格
-			    double price = html.getPrice(doc);
-			    System.out.println(pageName+"---"+price);
+			    /*double price = html.getPrice(doc);
+			    System.out.println(pageName+"---"+price);*/
 				
 				// 产品所在类目ID
 			    /*List<Map<String,String>> depList = html.getFromDepList(doc);
