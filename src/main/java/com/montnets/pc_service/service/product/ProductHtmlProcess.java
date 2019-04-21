@@ -3,6 +3,7 @@ package com.montnets.pc_service.service.product;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,8 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.montnets.pc_service.constant.AMZConstant;
 import com.montnets.pc_service.entity.AmzProduct;
+import com.montnets.pc_service.entity.AmzProductBsr;
+import com.montnets.pc_service.util.GetIncrementId;
 import com.montnets.pc_service.util.URLUtil;
 
 import cn.hutool.core.util.StrUtil;
@@ -43,6 +46,8 @@ public class ProductHtmlProcess {
 		    }
 		    
 		    AmzProduct product = new AmzProduct();
+		    long id = GetIncrementId.getInstance().getCount();
+		    product.setId(id);
 		    // ASIN
 		    String asin = getASIN(doc);
 		    product.setProdAsin(asin);
@@ -75,19 +80,24 @@ public class ProductHtmlProcess {
 		    // amz精选关键字url
 		    String acKeyUrl = getAmzChoiceKeyUrl(doc);
 		    product.setAmzchoiceKeyUrl(acKeyUrl);
-		    // 产品所在类目ID
+		    // 产品所在类目
 		    List<Map<String,String>> depList = getFromDepList(doc);
 		    String fromDepId = getFromDepId(depList);
 		    product.setFromDepId(fromDepId);
-		    // 产品所在类目列表json
+		    String fromDepName = getFromDepName(depList);
+		    product.setFromDepName(fromDepName);
 		    String fromDepJson = getFromDepListJson(depList);
 		    product.setFromDepJson(fromDepJson);
 		    // BSR
 		    List<Map<String,String>> bsrList = getBSRList(doc);
 		    int bsrNum = getBSRRootNum(bsrList);
 		    product.setBsr(bsrNum);
+		    String bsrDepName = getBSRRootDepName(bsrList);
+		    product.setBsrDepName(bsrDepName);
 		    String bsrJson = getBSRJson(bsrList);
 		    product.setBsrJson(bsrJson);
+		    List<AmzProductBsr> prodBsrList = getBsrList(bsrList, product);
+		    product.setProductBsrList(prodBsrList);
 		    // Seller
 			Map<String,String> sellInfoMap = getSellInfo(doc);
 			String sellerName = getSellerName(sellInfoMap);
@@ -104,6 +114,8 @@ public class ProductHtmlProcess {
 			int fbaType = getFBAType(sellInfoMap);
 			product.setFbaType(fbaType);
 			
+			product.setCreateTime(new Date());
+			product.setUpdateTime(new Date());
 		    
 		    return product;
 		} 
@@ -445,6 +457,28 @@ public class ProductHtmlProcess {
 		return json;
 	}
 	
+	private String getFromDepName(List<Map<String,String>> depList) {
+		try {
+			if(depList == null || depList.size() < 1) {
+				log.error("获取产品所在类目名称，传入depList为空。");
+				return null;
+			}
+			
+			Map<String,String> depMap = depList.get(depList.size() - 1);
+			if(depMap == null || depMap.size() < 1) {
+				log.error("获取产品所在类目名称，获取最后一个类目map为空。");
+				return null;
+			}
+			
+			String depName = depMap.get(AMZConstant.AMZ_KEY_PRODUCT_DEPNAME);
+			return depName;
+			
+		} catch (Exception e) {
+			log.error("获取产品所在类目名称，异常", e);
+			return null;
+		}
+	}
+	
 	private String getFromDepId(List<Map<String,String>> depList) {
 		try {
 			if(depList == null || depList.size() < 1) {
@@ -458,7 +492,7 @@ public class ProductHtmlProcess {
 				return null;
 			}
 			
-			String depUrl = depMap.get("depUrl");
+			String depUrl = depMap.get(AMZConstant.AMZ_KEY_PRODUCT_DEPURL);
 			
 			//url示例：/s/ref=dp_bc_aui_C_3?ie=UTF8&node=723452011&rh=n%3A16225010011%2Cn%3A723418011%2C
 			Map<String, String> mapRequestParam = URLUtil.URLRequest(depUrl);
@@ -510,8 +544,8 @@ public class ProductHtmlProcess {
 					continue;
 				}
 				
-				depMap.put("depName", depName.trim());
-				depMap.put("depUrl", depUrl.trim());
+				depMap.put(AMZConstant.AMZ_KEY_PRODUCT_DEPNAME, depName.trim());
+				depMap.put(AMZConstant.AMZ_KEY_PRODUCT_DEPURL, depUrl.trim());
 				depList.add(depMap);
 			}
 			return depList;
@@ -653,6 +687,47 @@ public class ProductHtmlProcess {
 		}
 	}
 	
+	private List<AmzProductBsr> getBsrList(List<Map<String,String>> bsrList, AmzProduct prod){
+		if(bsrList == null || bsrList.size() < 1) {
+			return null;
+		}
+		
+		try {
+			List<AmzProductBsr> prodBsrList = new ArrayList<>();
+			
+			for(int i = 0; i < bsrList.size(); i++) {
+				Map<String,String> bsrMap = bsrList.get(i);
+				if(bsrMap == null || bsrMap.size() < 1) {
+					continue;
+				}
+				AmzProductBsr prodBsr = new AmzProductBsr();
+				long id = GetIncrementId.getInstance().getCount();
+				prodBsr.setId(id);
+				prodBsr.setProdAsin(prod.getProdAsin());
+				prodBsr.setProdId(prod.getId());
+				
+				String bsrNumStr = bsrMap.get(AMZConstant.AMZ_KEY_BSR_NUM);
+				if(StrUtil.isBlank(bsrNumStr)) {
+					continue;
+				}
+				int bsrNum = Integer.parseInt(bsrNumStr);
+				prodBsr.setBsr(bsrNum);
+				
+				prodBsr.setBsrDepName(bsrMap.get(AMZConstant.AMZ_KEY_BSR_DEPNAME));
+				prodBsr.setBsrUrl(bsrMap.get(AMZConstant.AMZ_KEY_BSR_DEPURL));
+				prodBsr.setSortNum(i);
+				prodBsr.setCreateTime(new Date());
+				prodBsr.setUpdateTime(new Date());
+				prodBsrList.add(prodBsr);
+			}
+			
+			return prodBsrList;
+		} catch (Exception e) {
+			log.error("获取bsr，异常。", e);
+			return null;
+		}
+	}
+	
 	private int getBSRRootNum(List<Map<String,String>> bsrList) {
 		if(bsrList == null || bsrList.size() < 1) {
 			return 0;
@@ -664,7 +739,7 @@ public class ProductHtmlProcess {
 				return 0;
 			}
 			
-			String bsrNumStr = bsrMap.get("bsrNum");
+			String bsrNumStr = bsrMap.get(AMZConstant.AMZ_KEY_BSR_NUM);
 			if(StrUtil.isBlank(bsrNumStr)) {
 				return 0;
 			}
@@ -674,6 +749,25 @@ public class ProductHtmlProcess {
 		} catch (Exception e) {
 			log.error("获取BSR大类排名，异常。", e);
 			return 0;
+		}
+	}
+	
+	private String getBSRRootDepName(List<Map<String,String>> bsrList) {
+		if(bsrList == null || bsrList.size() < 1) {
+			return null;
+		}
+		
+		try {
+			Map<String,String> bsrMap = bsrList.get(0);
+			if(bsrMap == null || bsrMap.size() < 1) {
+				return null;
+			}
+			
+			String bsrNumStr = bsrMap.get(AMZConstant.AMZ_KEY_BSR_DEPNAME);
+			return bsrNumStr;
+		} catch (Exception e) {
+			log.error("获取BSR大类排名机构名称，异常。", e);
+			return null;
 		}
 	}
 	
@@ -785,9 +879,9 @@ public class ProductHtmlProcess {
 				}
 			}
 			Map<String,String> bsrMap = new HashMap<>();
-			bsrMap.put("bsrNum", bsrNumStr);
-			bsrMap.put("bsrDepUrl", bsrDepUrl);
-			bsrMap.put("bsrDepName", bsrDepName);
+			bsrMap.put(AMZConstant.AMZ_KEY_BSR_NUM, bsrNumStr);
+			bsrMap.put(AMZConstant.AMZ_KEY_BSR_DEPNAME, bsrDepName);
+			bsrMap.put(AMZConstant.AMZ_KEY_BSR_DEPURL, bsrDepUrl);
 			bsrList.add(bsrMap);
 			
 			for(int i = 1; i < bsrSpanEls.size(); i++)
@@ -830,9 +924,9 @@ public class ProductHtmlProcess {
 				bsrDepName = aEl.text();
 				
 				bsrMap = new HashMap<>();
-				bsrMap.put("bsrNum", bsrNumStr);
-				bsrMap.put("bsrDepUrl", bsrDepUrl);
-				bsrMap.put("bsrDepName", bsrDepName);
+				bsrMap.put(AMZConstant.AMZ_KEY_BSR_NUM, bsrNumStr);
+				bsrMap.put(AMZConstant.AMZ_KEY_BSR_DEPNAME, bsrDepName);
+				bsrMap.put(AMZConstant.AMZ_KEY_BSR_DEPURL, bsrDepUrl);
 				bsrList.add(bsrMap);
 			}
 			
@@ -895,9 +989,9 @@ public class ProductHtmlProcess {
 			
 			List<Map<String,String>> bsrList = new ArrayList<>();
 			Map<String,String> bsrMap = new HashMap<>();
-			bsrMap.put("bsrNum", bsrNumStr);
-			bsrMap.put("bsrDepName", bsrDepName);
-			bsrMap.put("bsrDepUrl", bsrDepUrl);
+			bsrMap.put(AMZConstant.AMZ_KEY_BSR_NUM, bsrNumStr);
+			bsrMap.put(AMZConstant.AMZ_KEY_BSR_DEPNAME, bsrDepName);
+			bsrMap.put(AMZConstant.AMZ_KEY_BSR_DEPURL, bsrDepUrl);
 			bsrList.add(bsrMap);
 			
 			Elements bsrLiEls = liEls.select("li li");
@@ -943,9 +1037,9 @@ public class ProductHtmlProcess {
 				}
 				
 				bsrMap = new HashMap<>();
-				bsrMap.put("bsrNum", bsrNumStr);
-				bsrMap.put("bsrDepName", bsrDepName);
-				bsrMap.put("bsrDepUrl", bsrDepUrl);
+				bsrMap.put(AMZConstant.AMZ_KEY_BSR_NUM, bsrNumStr);
+				bsrMap.put(AMZConstant.AMZ_KEY_BSR_DEPNAME, bsrDepName);
+				bsrMap.put(AMZConstant.AMZ_KEY_BSR_DEPURL, bsrDepUrl);
 				bsrList.add(bsrMap);
 			}
 			
@@ -1272,10 +1366,10 @@ public class ProductHtmlProcess {
 			    System.out.println(pageName+"---"+price);*/
 				
 				// 产品所在类目ID
-			    /*List<Map<String,String>> depList = html.getFromDepList(doc);
+			    List<Map<String,String>> depList = html.getFromDepList(doc);
 			    String fromDepId = html.getFromDepId(depList);
 			    String fromDepJson = html.getFromDepListJson(depList);
-			    System.out.println(pageName+"---"+fromDepId+"---"+fromDepJson);*/
+			    System.out.println(pageName+"---"+fromDepId+"---"+fromDepJson);
 				
 				// 店铺
 			    /*String shopName = html.selectForText(doc, "a#bylineInfo");

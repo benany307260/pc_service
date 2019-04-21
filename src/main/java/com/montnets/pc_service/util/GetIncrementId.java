@@ -44,6 +44,11 @@ public class GetIncrementId
 		return single;
 	}
 
+	synchronized public long getCount()
+	{
+		return getCount(1, 1);
+	}
+	
 	/**
 	 * 生成自增ID
 	 * 

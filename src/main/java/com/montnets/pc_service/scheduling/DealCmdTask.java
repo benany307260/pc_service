@@ -12,6 +12,7 @@ import com.montnets.pc_service.constant.CmdType;
 import com.montnets.pc_service.dao.CmdMapper;
 import com.montnets.pc_service.entity.AmzCmdtask;
 import com.montnets.pc_service.service.department.AmzDepService;
+import com.montnets.pc_service.service.product.AmzProductService;
 
 @Service
 public class DealCmdTask {
@@ -23,6 +24,9 @@ public class DealCmdTask {
 	
 	@Autowired
 	private AmzDepService amzDepService;
+	
+	@Autowired
+	private AmzProductService productService;
 	
 	private static Integer cmdTaskId = 0;
 	
@@ -76,6 +80,11 @@ public class DealCmdTask {
 			if(cmdTask.getCmdType() == CmdType.CMD103) {
 				String cmdText = cmdTask.getCmdText();
 				int res = amzDepService.dealSonDep(cmdText);
+				return res;
+			}
+			if(cmdTask.getCmdType() == CmdType.CMD105) {
+				String cmdText = cmdTask.getCmdText();
+				int res = productService.dealProduct(cmdText);
 				return res;
 			}
 			

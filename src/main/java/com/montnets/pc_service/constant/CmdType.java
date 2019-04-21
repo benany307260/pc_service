@@ -21,4 +21,14 @@ public class CmdType {
 	 * 处理子类目html
 	 */
 	public static int CMD103 = 103;
+	
+	/**
+	 * 下载产品html
+	 */
+	public static int CMD104 = 104;
+	
+	/**
+	 * 处理产品html
+	 */
+	public static int CMD105 = 105;
 }

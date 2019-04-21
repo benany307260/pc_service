@@ -11,6 +11,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 
 /**
@@ -28,6 +29,9 @@ public class AmzProduct implements Serializable {
 
 	private Integer bsr;
 	
+	@Column(name="BSR_DEP_NAME")
+	private String bsrDepName;
+	
 	@Column(name="BSR_JSON")
 	private String bsrJson;
 
@@ -37,6 +41,9 @@ public class AmzProduct implements Serializable {
 
 	@Column(name="FROM_DEP_ID")
 	private String fromDepId;
+	
+	@Column(name="FROM_DEP_NAME")
+	private String fromDepName;
 	
 	@Column(name="FROM_DEP_JSON")
 	private String fromDepJson;
@@ -111,9 +118,32 @@ public class AmzProduct implements Serializable {
 	@Column(name="FBA_TYPE")
 	private Integer fbaType;
 	
+	@Column(name="HTML_FILE_PATH")
+	private String htmlFilePath;
+	
+	@Column(name="PROD_URL")
+	private String prodUrl;
+	
+	@Transient
 	private List<AmzProductBsr> productBsrList;
 
 	public AmzProduct() {
+	}
+
+	public String getBsrDepName() {
+		return bsrDepName;
+	}
+
+	public void setBsrDepName(String bsrDepName) {
+		this.bsrDepName = bsrDepName;
+	}
+
+	public String getFromDepName() {
+		return fromDepName;
+	}
+
+	public void setFromDepName(String fromDepName) {
+		this.fromDepName = fromDepName;
 	}
 
 	public String getFulfillName() {
@@ -354,6 +384,22 @@ public class AmzProduct implements Serializable {
 
 	public void setUpdateTime(Date updateTime) {
 		this.updateTime = updateTime;
+	}
+
+	public String getHtmlFilePath() {
+		return htmlFilePath;
+	}
+
+	public void setHtmlFilePath(String htmlFilePath) {
+		this.htmlFilePath = htmlFilePath;
+	}
+
+	public String getProdUrl() {
+		return prodUrl;
+	}
+
+	public void setProdUrl(String prodUrl) {
+		this.prodUrl = prodUrl;
 	}
 
 }

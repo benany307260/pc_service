@@ -17,8 +17,20 @@ public class AmzProductBsr implements Serializable {
 
 	@Id
 	private Long id;
+	
+	@Column(name="PROD_ID")
+	private Long prodId;
+	
+	@Column(name="PROD_ASIN")
+	private String prodAsin;
 
-	private int bsr;
+	private Integer bsr;
+
+	@Column(name="BSR_DEPID")
+	private String bsrDepid;
+
+	@Column(name="BSR_DEP_NAME")
+	private String bsrDepName;
 
 	@Column(name="BSR_URL")
 	private String bsrUrl;
@@ -27,20 +39,22 @@ public class AmzProductBsr implements Serializable {
 	@Column(name="CREATE_TIME")
 	private Date createTime;
 
-	@Column(name="DEP_ID")
-	private String depId;
-
-	@Column(name="DEP_NAME_EN")
-	private String depNameEn;
-
-	@Column(name="PROD_ASIN")
-	private String prodAsin;
-
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="UPDATE_TIME")
 	private Date updateTime;
+	
+	@Column(name="SORT_NUM")
+	private Integer sortNum;
 
 	public AmzProductBsr() {
+	}
+
+	public Integer getSortNum() {
+		return sortNum;
+	}
+
+	public void setSortNum(Integer sortNum) {
+		this.sortNum = sortNum;
 	}
 
 	public Long getId() {
@@ -51,12 +65,44 @@ public class AmzProductBsr implements Serializable {
 		this.id = id;
 	}
 
-	public int getBsr() {
+	public Long getProdId() {
+		return prodId;
+	}
+
+	public void setProdId(Long prodId) {
+		this.prodId = prodId;
+	}
+
+	public String getProdAsin() {
+		return prodAsin;
+	}
+
+	public void setProdAsin(String prodAsin) {
+		this.prodAsin = prodAsin;
+	}
+
+	public Integer getBsr() {
 		return bsr;
 	}
 
-	public void setBsr(int bsr) {
+	public void setBsr(Integer bsr) {
 		this.bsr = bsr;
+	}
+
+	public String getBsrDepid() {
+		return bsrDepid;
+	}
+
+	public void setBsrDepid(String bsrDepid) {
+		this.bsrDepid = bsrDepid;
+	}
+
+	public String getBsrDepName() {
+		return bsrDepName;
+	}
+
+	public void setBsrDepName(String bsrDepName) {
+		this.bsrDepName = bsrDepName;
 	}
 
 	public String getBsrUrl() {
@@ -73,30 +119,6 @@ public class AmzProductBsr implements Serializable {
 
 	public void setCreateTime(Date createTime) {
 		this.createTime = createTime;
-	}
-
-	public String getDepId() {
-		return depId;
-	}
-
-	public void setDepId(String depId) {
-		this.depId = depId;
-	}
-
-	public String getDepNameEn() {
-		return depNameEn;
-	}
-
-	public void setDepNameEn(String depNameEn) {
-		this.depNameEn = depNameEn;
-	}
-
-	public String getProdAsin() {
-		return prodAsin;
-	}
-
-	public void setProdAsin(String prodAsin) {
-		this.prodAsin = prodAsin;
 	}
 
 	public Date getUpdateTime() {

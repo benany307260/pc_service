@@ -23,4 +23,14 @@ public class AMZConstant {
 	 */
 	public static String AMZ_SELF_FBA_CONTENT = "Ships from and sold by Amazon.com";
 	
+	public static String AMZ_KEY_BSR_NUM = "bsrNum";
+	
+	public static String AMZ_KEY_BSR_DEPURL = "bsrDepUrl";
+	
+	public static String AMZ_KEY_BSR_DEPNAME = "bsrDepName";
+	
+	public static String AMZ_KEY_PRODUCT_DEPNAME = "prodDepName";
+	
+	public static String AMZ_KEY_PRODUCT_DEPURL = "prodDepUrl";
+	
 }
