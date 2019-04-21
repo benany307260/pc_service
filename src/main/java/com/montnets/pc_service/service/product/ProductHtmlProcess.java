@@ -1303,7 +1303,7 @@ public class ProductHtmlProcess {
 				int sellerType = html.getSellerType(sellInfoMap);
 				String fulfillName = html.getFulfillName(sellInfoMap);
 				int fbaType = html.getFBAType(sellInfoMap);
-				System.out.println(pageName+"---"+sellerName+"---"+fulfillName+"---"+sellerType+"---"+fbaType);*/
+				System.out.println(pageName+"---"+sellerName+"---"+fulfillName+"---"+sellerType+"---"+fbaType);*/ 
 				
 			}
 			
