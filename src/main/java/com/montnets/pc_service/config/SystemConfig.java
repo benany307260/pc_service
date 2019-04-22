@@ -21,6 +21,16 @@ public class SystemConfig {
 	 * 服务端区域编号，最大两位
 	 */
 	private int areaNode;
+	
+	private String amzUrl;
+
+	public String getAmzUrl() {
+		return amzUrl;
+	}
+
+	public void setAmzUrl(String amzUrl) {
+		this.amzUrl = amzUrl;
+	}
 
 	public String getScanCmdCron() {
 		return scanCmdCron;
