@@ -66,6 +66,9 @@ public class AmzDepartment implements Serializable {
 	@Column(name="URL_DOMAIN")
 	private String urlDomain;
 	
+	@Column(name="SOFT_NUM")
+	private Integer softNum;
+	
 	public AmzDepartment() {
 	}
 	
@@ -83,9 +86,18 @@ public class AmzDepartment implements Serializable {
 				+ "dataSrcUrl=" + dataSrcUrl + ","
 				+ "dataTarUrl=" + dataTarUrl + ","
 				+ "depStatus=" + depStatus + ","
+				+ "softNum=" + softNum + ","
 				+ "createTime=" + createTime + ","
 				+ "updateTime=" + updateTime + ","
 				;
+	}
+
+	public Integer getSoftNum() {
+		return softNum;
+	}
+
+	public void setSoftNum(Integer softNum) {
+		this.softNum = softNum;
 	}
 
 	public String getDataTarUrl() {
