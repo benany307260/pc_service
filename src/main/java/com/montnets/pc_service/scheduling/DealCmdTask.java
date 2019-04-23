@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.montnets.pc_service.constant.CmdType;
 import com.montnets.pc_service.dao.CmdMapper;
 import com.montnets.pc_service.entity.AmzCmdtask;
+import com.montnets.pc_service.listpage.ProductListService;
 import com.montnets.pc_service.service.department.AmzDepService;
 import com.montnets.pc_service.service.product.AmzProductService;
 
@@ -27,6 +28,9 @@ public class DealCmdTask {
 	
 	@Autowired
 	private AmzProductService productService;
+	
+	@Autowired
+	private ProductListService productListService;
 	
 	private static Integer cmdTaskId = 0;
 	
@@ -85,6 +89,11 @@ public class DealCmdTask {
 			if(cmdTask.getCmdType() == CmdType.CMD105) {
 				String cmdText = cmdTask.getCmdText();
 				int res = productService.dealProduct(cmdText);
+				return res;
+			}
+			if(cmdTask.getCmdType() == CmdType.CMD107) {
+				String cmdText = cmdTask.getCmdText();
+				int res = productListService.dealProductList(cmdText);
 				return res;
 			}
 			

@@ -33,4 +33,9 @@ public class AMZConstant {
 	
 	public static String AMZ_KEY_PRODUCT_DEPURL = "prodDepUrl";
 	
+	
+	public static String CMD_KEY_PAGE_TYPE = "pageType";
+	
+	public static String CMD_KEY_HTML_FILE_PATH = "htmlFilePath";
+	
 }

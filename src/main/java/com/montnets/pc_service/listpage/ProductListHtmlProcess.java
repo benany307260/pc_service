@@ -10,22 +10,30 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.montnets.pc_service.config.SystemConfig;
 import com.montnets.pc_service.entity.AmzProduct;
 
 import cn.hutool.core.util.StrUtil;
 
 @Service
-public class ListHtmlProcess {
+public class ProductListHtmlProcess {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 	
-	@Autowired
-	private SystemConfig systemConfig;
-	
+
+	public List<AmzProduct> getListPage(int type, String htmlFilePath){
+		if(type == 1) {
+			return getListFirstPage(htmlFilePath);
+		}
+		else if(type == 2) {
+			return getListSecondAfter(htmlFilePath);
+		}
+		else {
+			log.error("解析html获取产品列表，未定义的类型。");
+			return null;
+		}
+	}
 	
 	private List<AmzProduct> getListFirstPage(String htmlFilePath) {
 		try
@@ -120,7 +128,7 @@ public class ListHtmlProcess {
 	
 	public static void main(String[] args) {
 		try {
-			ListHtmlProcess html = new ListHtmlProcess();
+			ProductListHtmlProcess html = new ProductListHtmlProcess();
 			//String mkdir = "C:/Users/lenovo/git/pc_service/page/%s";
 			String mkdir = "F:\\study\\amz\\git\\pc_service\\page\\list-page\\%s";
 			
