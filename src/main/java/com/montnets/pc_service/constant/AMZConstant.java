@@ -38,4 +38,14 @@ public class AMZConstant {
 	
 	public static String CMD_KEY_HTML_FILE_PATH = "htmlFilePath";
 	
+	/**
+	 * list页面的第一页
+	 */
+	public static int VALUE_PAGE_TYPE_FIRST = 1;
+	
+	/**
+	 * list页第一页后面的页
+	 */
+	public static int VALUE_PAGE_TYPE_AFTER = 2;
+	
 }

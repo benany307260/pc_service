@@ -29,11 +29,11 @@ public class AmzDepartment implements Serializable {
 	@Column(name="CREATE_TIME")
 	private Date createTime;
 
-	@Column(name="DATA_SRC_URL")
-	private String dataSrcUrl;
+	@Column(name="FROM_HTML_FILE_PATH")
+	private String fromHtmlFilePath;
 	
-	@Column(name="DATA_TAR_URL")
-	private String dataTarUrl;
+	@Column(name="HTML_FILE_PATH")
+	private String htmlFilePath;
 
 	@Id
 	@Column(name="DEP_ID")
@@ -51,11 +51,11 @@ public class AmzDepartment implements Serializable {
 	@Column(name="PARENT_ID")
 	private Long parentId;
 
-	@Column(name="SHOW_NAME_CN")
-	private String showNameCn;
+	@Column(name="DEP_NAME_CN")
+	private String depNameCn;
 
-	@Column(name="SHOW_NAME_EN")
-	private String showNameEn;
+	@Column(name="DEP_NAME")
+	private String depName;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="UPDATE_TIME")
@@ -72,6 +72,12 @@ public class AmzDepartment implements Serializable {
 	public AmzDepartment() {
 	}
 	
+	public AmzDepartment(String depName, String url, Integer softNum) {
+		this.depName = depName;
+		this.url = url;
+		this.softNum = softNum;
+	}
+	
 	public String toString() {
 		return ""
 				+ "id=" + id + ","
@@ -79,12 +85,12 @@ public class AmzDepartment implements Serializable {
 				+ "depLevel=" + depLevel + ","
 				+ "parentDepId=" + parentDepId + ","
 				+ "parentId=" + parentId + ","
-				+ "showNameEn=" + showNameEn + ","
-				+ "showNameCn=" + showNameCn + ","
+				+ "depName=" + depName + ","
+				+ "depNameCn=" + depNameCn + ","
 				+ "urlDomain=" + urlDomain + ","
 				+ "url=" + url + ","
-				+ "dataSrcUrl=" + dataSrcUrl + ","
-				+ "dataTarUrl=" + dataTarUrl + ","
+				+ "htmlFilePath=" + htmlFilePath + ","
+				+ "fromHtmlFilePath=" + fromHtmlFilePath + ","
 				+ "depStatus=" + depStatus + ","
 				+ "softNum=" + softNum + ","
 				+ "createTime=" + createTime + ","
@@ -100,12 +106,12 @@ public class AmzDepartment implements Serializable {
 		this.softNum = softNum;
 	}
 
-	public String getDataTarUrl() {
-		return dataTarUrl;
+	public String getFromHtmlFilePath() {
+		return fromHtmlFilePath;
 	}
 
-	public void setDataTarUrl(String dataTarUrl) {
-		this.dataTarUrl = dataTarUrl;
+	public void setFromHtmlFilePath(String fromHtmlFilePath) {
+		this.fromHtmlFilePath = fromHtmlFilePath;
 	}
 
 	public Long getId() {
@@ -124,12 +130,12 @@ public class AmzDepartment implements Serializable {
 		this.createTime = createTime;
 	}
 
-	public String getDataSrcUrl() {
-		return dataSrcUrl;
+	public String getHtmlFilePath() {
+		return htmlFilePath;
 	}
 
-	public void setDataSrcUrl(String dataSrcUrl) {
-		this.dataSrcUrl = dataSrcUrl;
+	public void setHtmlFilePath(String htmlFilePath) {
+		this.htmlFilePath = htmlFilePath;
 	}
 
 	public String getDepId() {
@@ -172,20 +178,20 @@ public class AmzDepartment implements Serializable {
 		this.parentId = parentId;
 	}
 
-	public String getShowNameCn() {
-		return showNameCn;
+	public String getDepNameCn() {
+		return depNameCn;
 	}
 
-	public void setShowNameCn(String showNameCn) {
-		this.showNameCn = showNameCn;
+	public void setDepNameCn(String depNameCn) {
+		this.depNameCn = depNameCn;
 	}
 
-	public String getShowNameEn() {
-		return showNameEn;
+	public String getDepName() {
+		return depName;
 	}
 
-	public void setShowNameEn(String showNameEn) {
-		this.showNameEn = showNameEn;
+	public void setDepName(String depName) {
+		this.depName = depName;
 	}
 
 	public Date getUpdateTime() {

@@ -138,9 +138,9 @@ public class AmzDepService {
 			log.error("处理根类目，传入父类目对象为null。");
 			return null;
 		}
-		Map<String,String> depMap = depRootHtmlProcess.getDepsFromHtml(parentDep.getDataTarUrl());
+		Map<String,String> depMap = depRootHtmlProcess.getDepsFromHtml(parentDep.getHtmlFilePath());
 		if(depMap == null || depMap.size() < 1) {
-			log.error("处理根类目，解析获取不到类目数据。htmlFilePath="+parentDep.getDataTarUrl());
+			log.error("处理根类目，解析获取不到类目数据。htmlFilePath="+parentDep.getHtmlFilePath());
 			return null;
 		}
 		
@@ -156,8 +156,8 @@ public class AmzDepService {
 				String depId = getAmzRootDepId(depUrl);
 				amzDep.setDepId(depId);
 
-				amzDep.setShowNameCn(key);
-				amzDep.setShowNameEn(key);
+				amzDep.setDepNameCn(key);
+				amzDep.setDepName(key);
 
 				amzDep.setUrl(depUrl);
 				amzDep.setUrlDomain(AMZConstant.AMZ_US_DOMAIN);
@@ -171,7 +171,7 @@ public class AmzDepService {
 				// 类目状态。0-正常；1-被删除
 				amzDep.setDepStatus(0);
 				
-				amzDep.setDataSrcUrl(parentDep.getDataTarUrl());
+				amzDep.setFromHtmlFilePath(parentDep.getHtmlFilePath());
 				
 				amzDep.setCreateTime(new Date());
 				amzDep.setUpdateTime(new Date());
@@ -181,7 +181,7 @@ public class AmzDepService {
 			amzDepartmentRespository.saveAll(amzDepList);
 			return amzDepList;
 		} catch (Exception e) {
-			log.error("处理根类目，异常。htmlFilePath="+parentDep.getDataTarUrl(), e);
+			log.error("处理根类目，异常。htmlFilePath="+parentDep.getHtmlFilePath(), e);
 			return null;
 		}
 	}
@@ -192,48 +192,46 @@ public class AmzDepService {
 			log.error("处理子类目，传入父类目对象为null。");
 			return null;
 		}
-		Map<String,String> depMap = depSonHtmlProcess.getDepsFromHtml(parentDep.getDataTarUrl(), parentDep.getDepId());
-		if(depMap == null || depMap.size() < 1) {
+		
+		List<AmzDepartment> depList = depSonHtmlProcess.getDepsFromHtml(parentDep.getHtmlFilePath(), parentDep.getDepId());
+		if(depList == null || depList.size() < 1) {
 			log.error("处理子类目，解析获取不到类目数据。param="+parentDep.toString());
 			return null;
 		}
 		
 		try {
-			List<AmzDepartment> amzDepList = new ArrayList<>();
-			for(String key : depMap.keySet()) {
-				
-				AmzDepartment amzDep = new AmzDepartment();
+			for(AmzDepartment dep : depList) {
+				if(dep == null) {
+					continue;
+				}
 				long id = GetIncrementId.getInstance().getCount(systemConfig.getServerNode(), systemConfig.getAreaNode());
-				amzDep.setId(id);
+				dep.setId(id);
 				
-				String depUrl = depMap.get(key);
-				String depId = getAmzSonDepId(depUrl);
-				amzDep.setDepId(depId);
+				String depId = getAmzSonDepId(dep.getUrl());
+				dep.setDepId(depId);
 
-				amzDep.setShowNameCn(key);
-				amzDep.setShowNameEn(key);
+				//amzDep.setDepName(depName);
+				//amzDep.setDepNameCn(depName);
 
-				amzDep.setUrl(depUrl);
-				amzDep.setUrlDomain(AMZConstant.AMZ_US_DOMAIN);
+				//amzDep.setUrl(depUrl);
+				dep.setUrlDomain(AMZConstant.AMZ_US_DOMAIN);
 				
-				// 设置为根目录
-				amzDep.setDepLevel(parentDep.getDepLevel()+1);
+				// 设置目录层级
+				dep.setDepLevel(parentDep.getDepLevel()+1);
 				
-				amzDep.setParentId(parentDep.getId());
-				amzDep.setParentDepId(parentDep.getDepId());
+				dep.setParentId(parentDep.getId());
+				dep.setParentDepId(parentDep.getDepId());
 				
 				// 类目状态。0-正常；1-被删除
-				amzDep.setDepStatus(0);
+				dep.setDepStatus(0);
 				
-				amzDep.setDataSrcUrl(parentDep.getDataTarUrl());
+				dep.setFromHtmlFilePath(parentDep.getHtmlFilePath());
 				
-				amzDep.setCreateTime(new Date());
-				amzDep.setUpdateTime(new Date());
-				
-				amzDepList.add(amzDep);
+				dep.setCreateTime(new Date());
+				dep.setUpdateTime(new Date());
 			}
-			amzDepartmentRespository.saveAll(amzDepList);
-			return amzDepList;
+			amzDepartmentRespository.saveAll(depList);
+			return depList;
 		} catch (Exception e) {
 			log.error("处理子类目，异常。param="+parentDep.toString(), e);
 			return null;
@@ -313,8 +311,8 @@ public class AmzDepService {
 		
 		amzDep.setDepId("16225011011");
 
-		amzDep.setShowNameCn("Home & Kitchen");
-		amzDep.setShowNameEn("Home & Kitchen");
+		amzDep.setDepNameCn("Home & Kitchen");
+		amzDep.setDepName("Home & Kitchen");
 
 		amzDep.setUrl("/s/browse?_encoding=UTF8&node=16225011011&ref_=nav_shopall-export_nav_mw_sbd_intl_kitchen");
 		amzDep.setUrlDomain(AMZConstant.AMZ_US_DOMAIN);
@@ -330,7 +328,7 @@ public class AmzDepService {
 		
 		//amzDep.setDataSrcUrl(parentDep.getDataTarUrl());
 		//amzDep.setDataTarUrl("F:\\study\\amz\\git\\pc_service\\page\\index.html");
-		amzDep.setDataTarUrl("F:\\study\\amz\\git\\pc_service\\page\\amz_home_kitchen.html");
+		amzDep.setHtmlFilePath("F:\\study\\amz\\git\\pc_service\\page\\amz_home_kitchen.html");
 		
 		//amzDep.setCreateTime(new Date());
 		//amzDep.setUpdateTime(new Date());

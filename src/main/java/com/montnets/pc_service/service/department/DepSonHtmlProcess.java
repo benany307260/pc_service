@@ -1,8 +1,8 @@
 package com.montnets.pc_service.service.department;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -11,6 +11,10 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import com.montnets.pc_service.entity.AmzDepartment;
+
+import cn.hutool.core.util.StrUtil;
 
 @Service
 public class DepSonHtmlProcess {
@@ -23,7 +27,7 @@ public class DepSonHtmlProcess {
 	 * @param htmlFilePath
 	 * @return
 	 */
-	public Map<String,String> getDepsFromHtml(String htmlFilePath, String parentDepId) {
+	public List<AmzDepartment> getDepsFromHtml(String htmlFilePath, String parentDepId) {
 		try
 		{
 		    Document doc = Jsoup.parse( new File(htmlFilePath) , "utf-8" );
@@ -32,36 +36,53 @@ public class DepSonHtmlProcess {
 		    	return null;
 		    }
 		    
-		    Map<String,String> depMap = new HashMap<>();
-		    
-			Elements elements_li = doc.getElementsByTag("li");
-			for (Element element_li : elements_li) {
-				if(element_li == null) {
-					continue;
-				}
-				String content = element_li.toString();
-				String key1 = "rnid="+parentDepId;
-				// 不存在关键字
-				if (content.indexOf(key1) < 0) {
-					continue;
-				}
-				//System.out.println(content);
-				Element element_a = element_li.select("a").first();
-				if(element_a == null) {
-					continue;
-				}
-				String url = element_a.attr("href");
-				System.out.println(url);
-				Element element_span = element_a.select("span").first();
-				if(element_span == null) {
-					continue;
-				}
-				String depName = element_span.text();
-				//System.out.println(depName);
-				depMap.put(depName, url);
+		    Elements ulEls = doc.select("div#leftNav ul");
+		    if(ulEls == null || ulEls.size() < 1) {
+				log.error("解析html获取子类目，获取不到ul数据。htmlFilePath="+htmlFilePath+",parentDepId="+parentDepId);
+				return null;
 			}
 		    
-		    return depMap;
+		    Element firstUl = ulEls.first();
+		    if(firstUl == null) {
+		    	log.error("解析html获取子类目，获取不到第一个ul数据。htmlFilePath="+htmlFilePath+",parentDepId="+parentDepId);
+				return null;
+		    }
+		    
+			Elements aEls = firstUl.select("li a");
+			if(aEls == null || aEls.size() < 1) {
+				log.error("解析html获取子类目，获取不到数据。htmlFilePath="+htmlFilePath+",parentDepId="+parentDepId);
+				return null;
+			}
+			
+			List<AmzDepartment> depList = new ArrayList<>();
+			
+			int softNum = 1;
+			
+			for (Element aEl : aEls) {
+				if(aEl == null) {
+					continue;
+				}
+				String url = aEl.attr("href");
+				if(StrUtil.isBlank(url)) {
+					continue;
+				}
+				String key_bbn = "bbn="+parentDepId;
+				// 不存在关键字
+				if (url.indexOf(key_bbn) < 0) {
+					continue;
+				}
+				
+				String depName = aEl.text();
+				if(StrUtil.isBlank(depName)) {
+					continue;
+				}
+				
+				AmzDepartment dep = new AmzDepartment(depName, url, softNum);
+				depList.add(dep);
+				softNum++;
+			}
+		    
+		    return depList;
 		} 
 		catch (Exception e) 
 		{
@@ -73,7 +94,7 @@ public class DepSonHtmlProcess {
 	
 	public static void main(String[] args) {
 		DepSonHtmlProcess html = new DepSonHtmlProcess();
-		String path = "F:\\study\\amz\\git\\pc_service\\page\\amz_home_kitchen.html";
-		html.getDepsFromHtml(path, "16225011011");
+		String path = "C:\\Users\\lenovo\\git\\pc_service\\page\\list-page\\Arts & Crafts-123456789.html";
+		html.getDepsFromHtml(path, "4954955011");
 	}
 }

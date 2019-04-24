@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.montnets.pc_service.constant.AMZConstant;
 import com.montnets.pc_service.entity.AmzProduct;
 
 import cn.hutool.core.util.StrUtil;
@@ -23,10 +24,10 @@ public class ProductListHtmlProcess {
 	
 
 	public List<AmzProduct> getListPage(int type, String htmlFilePath){
-		if(type == 1) {
+		if(type == AMZConstant.VALUE_PAGE_TYPE_FIRST) {
 			return getListFirstPage(htmlFilePath);
 		}
-		else if(type == 2) {
+		else if(type == AMZConstant.VALUE_PAGE_TYPE_AFTER) {
 			return getListSecondAfter(htmlFilePath);
 		}
 		else {
