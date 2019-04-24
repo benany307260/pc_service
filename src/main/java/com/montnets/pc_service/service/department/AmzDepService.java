@@ -3,6 +3,7 @@ package com.montnets.pc_service.service.department;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -108,15 +109,9 @@ public class AmzDepService {
 			List<AmzCmdtask> cmdList = new ArrayList<>();
 			// 写指令通知下载程序下载子类目页面
 			for(AmzDepartment dep : depList) {
-				AmzCmdtask cmd = new AmzCmdtask();
-				cmd.setCmdStatus(0);
-				cmd.setCmdType(CmdType.CMD102);
-				
 				String cmdTextJson = JSON.toJSONString(dep);
-				
-				cmd.setCmdText(cmdTextJson);
-				
-				cmdList.add(cmd);
+				AmzCmdtask cmd102 = new AmzCmdtask(CmdType.CMD102, cmdTextJson);
+				cmdList.add(cmd102);
 			}
 			
 			cmdtaskRespository.saveAll(cmdList);
@@ -200,6 +195,21 @@ public class AmzDepService {
 		}
 		
 		try {
+			
+			// 去掉比shopAllContent排序要小的key
+			Iterator<AmzDepartment> it = depList.iterator();
+			while(it.hasNext()) {
+				AmzDepartment dep = it.next();
+				String depId = getAmzSonDepId(dep.getUrl());
+				// depId是属于父id，要排除掉
+				if(parentDep.getDepIdAll().indexOf(depId) > -1) {
+					it.remove();
+					continue;
+				}
+				dep.setDepId(depId);
+				dep.setDepIdAll(parentDep.getDepIdAll() + "/" + depId);
+			}
+			
 			for(AmzDepartment dep : depList) {
 				if(dep == null) {
 					continue;
@@ -207,8 +217,8 @@ public class AmzDepService {
 				long id = GetIncrementId.getInstance().getCount(systemConfig.getServerNode(), systemConfig.getAreaNode());
 				dep.setId(id);
 				
-				String depId = getAmzSonDepId(dep.getUrl());
-				dep.setDepId(depId);
+				/*String depId = getAmzSonDepId(dep.getUrl());
+				dep.setDepId(depId);*/
 
 				//amzDep.setDepName(depName);
 				//amzDep.setDepNameCn(depName);

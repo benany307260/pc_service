@@ -10,6 +10,7 @@ URL_DOMAIN VARCHAR(256) DEFAULT '',/*类目url对应的域名*/
 DEP_LEVEL INT,/*类目层级，1为根目录*/
 PARENT_ID BIGINT,/*父类目标识ID*/
 PARENT_DEP_ID VARCHAR(256) DEFAULT '',/*父类目的Amazon类目id*/
+DEP_ID_ALL VARCHAR(1024) DEFAULT '',/*类目amz id，包括父类目id，格式如：parentid/id */
 DEP_STATUS INT DEFAULT 0,/*类目状态。0-正常；1-被删除*/
 HTML_FILE_PATH VARCHAR(512) DEFAULT '',/*该类目已下载的html页面路径*/
 FROM_HTML_FILE_PATH VARCHAR(512) DEFAULT '',/*该类目数据的来源html*/

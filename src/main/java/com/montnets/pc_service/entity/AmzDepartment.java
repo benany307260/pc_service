@@ -69,6 +69,9 @@ public class AmzDepartment implements Serializable {
 	@Column(name="SOFT_NUM")
 	private Integer softNum;
 	
+	@Column(name="DEP_ID_ALL")
+	private String depIdAll;
+	
 	public AmzDepartment() {
 	}
 	
@@ -96,6 +99,14 @@ public class AmzDepartment implements Serializable {
 				+ "createTime=" + createTime + ","
 				+ "updateTime=" + updateTime + ","
 				;
+	}
+
+	public String getDepIdAll() {
+		return depIdAll;
+	}
+
+	public void setDepIdAll(String depIdAll) {
+		this.depIdAll = depIdAll;
 	}
 
 	public Integer getSoftNum() {
