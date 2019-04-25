@@ -23,16 +23,26 @@ public class PageHtmlProcess {
 	
 
 	public Map<String,String> getNextPage(int type, String htmlFilePath){
+		
+		Map<String,String> nextPageMap = null;
 		if(type == AMZConstant.VALUE_PAGE_TYPE_FIRST) {
-			return getFirstNextPage(htmlFilePath);
+			nextPageMap = getFirstNextPage(htmlFilePath);
 		}
 		else if(type == AMZConstant.VALUE_PAGE_TYPE_AFTER) {
-			return getNextSecondAfter(htmlFilePath);
+			nextPageMap = getNextSecondAfter(htmlFilePath);
 		}
 		else {
 			log.error("解析html获取产品列表，未定义的类型。");
 			return null;
 		}
+		
+		if(nextPageMap == null || nextPageMap.size() < 1) {
+			return nextPageMap;
+		}
+		
+		nextPageMap.put(AMZConstant.CMD_KEY_PAGE_TYPE, "2");
+		
+		return nextPageMap;
 	}
 	
 	private Map<String,String> getFirstNextPage(String htmlFilePath) {
@@ -115,24 +125,12 @@ public class PageHtmlProcess {
 	public static void main(String[] args) {
 		try {
 			PageHtmlProcess html = new PageHtmlProcess();
-			//String mkdir = "C:/Users/lenovo/git/pc_service/page/%s";
-			String mkdir = "F:\\study\\amz\\git\\pc_service\\page\\list-page\\%s";
-			
-			/*for(int i = 1; i <= 1; i++) {
-				//i=11;
-				String pageName = "pet-supplies-"+i+".html";
-				String path = String.format(mkdir, pageName);
-				List<AmzProduct> prodList = html.getListPageFromHtml(path);
-				
-				for(AmzProduct prod : prodList) {
-					System.out.println(prod.getProdAsin()+"---"+prod.getProdUrl());
-				}
-				
-			}*/
-			
+			//String htmlFilePath = "C:\\Users\\lenovo\\git\\pc_service\\page\\list-page\\Arts & Crafts-123456789.html";
+			String htmlFilePath = "C:\\Users\\lenovo\\git\\pc_service\\page\\list-page\\Arts & Crafts-page2-123456789.html";
+			Map<String,String> dataMap = html.getNextPage(2, htmlFilePath);
+			System.out.println(dataMap.toString());
 			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

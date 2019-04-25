@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS amz_cmdtask (
 ID INT NOT NULL auto_increment,/*标识ID，自增*/
 CMD_TYPE INT DEFAULT 0,/*指令类型。101：待解析html类目*/
 CMD_TEXT VARCHAR(4096),/*指令内容*/
-CMD_STATUS INT DEFAULT 0,/*指令状态。0-未处理；1-处理中；2-处理成功；3-处理失败*/
+CMD_STATUS INT DEFAULT 0,/*指令状态。0-未处理；1-处理中；2-处理成功；3-处理失败；4-暂不处理*/
 CREATE_TIME DATETIME DEFAULT NOW(),
 UPDATE_TIME DATETIME DEFAULT NOW(),
 PRIMARY KEY (ID)

@@ -73,11 +73,6 @@ public class ProductListService {
 					continue;
 				}
 				
-				AmzCmdtask cmd = new AmzCmdtask();
-				cmd.setCmdStatus(0);
-				// 通知下载产品html
-				cmd.setCmdType(CmdType.CMD104);
-				
 				String prodUrl = product.getProdUrl();
 				if(StrUtil.isBlank(prodUrl)) {
 					log.error("处理产品列表，产品的prodUrl为空。cmdText="+cmdText);
@@ -89,8 +84,7 @@ public class ProductListService {
 				}
 				
 				String cmdTextJson = JSON.toJSONString(product);
-				
-				cmd.setCmdText(cmdTextJson);
+				AmzCmdtask cmd = new AmzCmdtask(CmdType.CMD104, cmdTextJson);
 				
 				cmdList.add(cmd);
 			}

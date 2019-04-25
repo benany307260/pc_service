@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.bentest.spiders.constant.CmdType;
 import com.bentest.spiders.dao.CmdMapper;
 import com.bentest.spiders.entity.AmzCmdtask;
+import com.bentest.spiders.listpage.PageService;
 import com.bentest.spiders.listpage.ProductListService;
 import com.bentest.spiders.service.department.AmzDepService;
 import com.bentest.spiders.service.product.AmzProductService;
@@ -31,6 +32,9 @@ public class DealCmdTask {
 	
 	@Autowired
 	private ProductListService productListService;
+	
+	@Autowired
+	private PageService pageService;
 	
 	private static Integer cmdTaskId = 0;
 	
@@ -94,6 +98,11 @@ public class DealCmdTask {
 			if(cmdTask.getCmdType() == CmdType.CMD107) {
 				String cmdText = cmdTask.getCmdText();
 				int res = productListService.dealProductList(cmdText);
+				return res;
+			}
+			if(cmdTask.getCmdType() == CmdType.CMD108) {
+				String cmdText = cmdTask.getCmdText();
+				int res = pageService.dealPage(cmdText);
 				return res;
 			}
 			
