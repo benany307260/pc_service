@@ -109,6 +109,18 @@ public class AmzDepService {
 			List<AmzCmdtask> cmdList = new ArrayList<>();
 			// 写指令通知下载程序下载子类目页面
 			for(AmzDepartment dep : depList) {
+				
+				if(StrUtil.isBlank(dep.getUrl())) {
+					log.error("处理子类目，获取子类目url为空。cmdText="+cmdText);
+					continue;
+				}
+				
+				String url = dep.getUrl();
+				if(url.indexOf(AMZConstant.AMZ_US_DOMAIN) < 0) {
+					url = systemConfig.getAmzUrl() + url;
+					dep.setUrl(url);
+				}
+				
 				String cmdTextJson = JSON.toJSONString(dep);
 				AmzCmdtask cmd102 = new AmzCmdtask(CmdType.CMD102, cmdTextJson);
 				cmdList.add(cmd102);
