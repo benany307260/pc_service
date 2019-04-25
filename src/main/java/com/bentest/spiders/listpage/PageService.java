@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
+import com.bentest.spiders.config.SystemConfig;
 import com.bentest.spiders.constant.AMZConstant;
 import com.bentest.spiders.constant.CmdType;
 import com.bentest.spiders.entity.AmzCmdtask;
@@ -27,8 +28,8 @@ public class PageService {
 	@Autowired
 	AmzCmdtaskRespository cmdtaskRespository;
 	
-	/*@Autowired
-    private SystemConfig systemConfig;*/
+	@Autowired
+    private SystemConfig systemConfig;
 	
 	public int dealPage(String cmdText) {
 		
@@ -59,6 +60,17 @@ public class PageService {
 			if(nextPageMap == null || nextPageMap.size() < 1) {
 				log.error("处理产品列表下一页，获取下一页为空。cmdText="+cmdText);
 				return -5;
+			}
+			
+			String nextPageUrl = nextPageMap.get(AMZConstant.CMD_KEY_NEXT_PAGE_URL);
+			if(StrUtil.isBlank(nextPageUrl)) {
+				log.error("处理产品列表下一页，获取下一页url为空。cmdText="+cmdText);
+				return -6;
+			}
+			
+			if(nextPageUrl.indexOf(AMZConstant.AMZ_US_DOMAIN) < 0) {
+				nextPageUrl = systemConfig.getAmzUrl() + nextPageUrl;
+				nextPageMap.put(AMZConstant.CMD_KEY_NEXT_PAGE_URL, nextPageUrl);
 			}
 			
 			String cmdTextJson = JSON.toJSONString(nextPageMap);
