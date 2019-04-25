@@ -2,7 +2,9 @@ package com.bentest.spiders.listpage;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -24,6 +26,40 @@ public class ProductListHtmlProcess {
 	
 
 	public List<AmzProduct> getListPage(int type, String htmlFilePath){
+		
+		Map<Integer,Integer> typeMap = new HashMap<>();
+		typeMap.put(1, 1);
+		typeMap.put(2, 2);
+		
+		List<AmzProduct> prodList = null;
+		
+		if(type == AMZConstant.VALUE_PAGE_TYPE_FIRST) {
+			prodList = getListPageByType(type, htmlFilePath);
+			// 这个类型已经试过，移除掉
+			typeMap.remove(type);
+		}
+		else if(type == AMZConstant.VALUE_PAGE_TYPE_AFTER) {
+			prodList = getListSecondAfter(htmlFilePath);
+			// 这个类型已经试过，移除掉
+			typeMap.remove(type);
+		}
+		else {
+			log.error("解析html获取产品列表，未定义的类型。");
+			return null;
+		}
+		
+		if(prodList != null && prodList.size() > 0) {
+			return prodList;
+		}
+		
+		for(Integer key : typeMap.keySet()) {
+			
+		}
+		
+	}
+	
+	public List<AmzProduct> getListPageByType(int type, String htmlFilePath){
+		
 		if(type == AMZConstant.VALUE_PAGE_TYPE_FIRST) {
 			return getListFirstPage(htmlFilePath);
 		}
@@ -113,6 +149,9 @@ public class ProductListHtmlProcess {
 	    		if(StrUtil.isBlank(href)) {
 	    			continue;
 	    		}
+	    		if("#".equals(href)) {
+	    			continue;
+	    		}
 	    		AmzProduct product = new AmzProduct();
 	    		product.setProdUrl(href);
 	    		prodList.add(product);
@@ -131,23 +170,10 @@ public class ProductListHtmlProcess {
 		try {
 			ProductListHtmlProcess html = new ProductListHtmlProcess();
 			//String mkdir = "C:/Users/lenovo/git/pc_service/page/%s";
-			String mkdir = "F:\\study\\amz\\git\\pc_service\\page\\list-page\\%s";
+			//String htmlFilePath = "C:\\Users\\lenovo\\git\\pc_service\\page\\list-page\\Automotive\\Automotive-2-123456789.html";
+			String htmlFilePath = "C:\\Users\\lenovo\\git\\pc_service\\page\\list-page\\Automotive\\Tools & Equipment-1-123456789.html";
 			
-			/*for(int i = 1; i <= 1; i++) {
-				//i=11;
-				String pageName = "pet-supplies-"+i+".html";
-				String path = String.format(mkdir, pageName);
-				List<AmzProduct> prodList = html.getListPageFromHtml(path);
-				
-				for(AmzProduct prod : prodList) {
-					System.out.println(prod.getProdAsin()+"---"+prod.getProdUrl());
-				}
-				
-			}*/
-			
-			String pageName = "pet-supplies-3.html";
-			String path = String.format(mkdir, pageName);
-			List<AmzProduct> prodList = html.getListSecondAfter(path);
+			List<AmzProduct> prodList = html.getListPage(2, htmlFilePath);
 			
 			for(AmzProduct prod : prodList) {
 				System.out.println(prod.getProdUrl());
