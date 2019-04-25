@@ -27,35 +27,27 @@ public class ProductListHtmlProcess {
 
 	public List<AmzProduct> getListPage(int type, String htmlFilePath){
 		
-		Map<Integer,Integer> typeMap = new HashMap<>();
-		typeMap.put(1, 1);
-		typeMap.put(2, 2);
-		
-		List<AmzProduct> prodList = null;
-		
-		if(type == AMZConstant.VALUE_PAGE_TYPE_FIRST) {
-			prodList = getListPageByType(type, htmlFilePath);
-			// 这个类型已经试过，移除掉
-			typeMap.remove(type);
-		}
-		else if(type == AMZConstant.VALUE_PAGE_TYPE_AFTER) {
-			prodList = getListSecondAfter(htmlFilePath);
-			// 这个类型已经试过，移除掉
-			typeMap.remove(type);
-		}
-		else {
-			log.error("解析html获取产品列表，未定义的类型。");
-			return null;
-		}
-		
+		// 先直接用指定类型获取
+		List<AmzProduct> prodList = getListPageByType(type, htmlFilePath);
 		if(prodList != null && prodList.size() > 0) {
 			return prodList;
 		}
 		
+		// 指定类型获取不到，用其他类型重试
+		Map<Integer,Integer> typeMap = new HashMap<>();
+		typeMap.put(1, 1);
+		typeMap.put(2, 2);
+		// 移除掉试过的类型
+		typeMap.remove(type);
+		
 		for(Integer key : typeMap.keySet()) {
-			
+			prodList = getListPageByType(key, htmlFilePath);
+			if(prodList != null && prodList.size() > 0) {
+				return prodList;
+			}
 		}
 		
+		return null;
 	}
 	
 	public List<AmzProduct> getListPageByType(int type, String htmlFilePath){
@@ -171,9 +163,10 @@ public class ProductListHtmlProcess {
 			ProductListHtmlProcess html = new ProductListHtmlProcess();
 			//String mkdir = "C:/Users/lenovo/git/pc_service/page/%s";
 			//String htmlFilePath = "C:\\Users\\lenovo\\git\\pc_service\\page\\list-page\\Automotive\\Automotive-2-123456789.html";
-			String htmlFilePath = "C:\\Users\\lenovo\\git\\pc_service\\page\\list-page\\Automotive\\Tools & Equipment-1-123456789.html";
+			//String htmlFilePath = "C:\\Users\\lenovo\\git\\pc_service\\page\\list-page\\Automotive\\Tools & Equipment-1-123456789.html";
+			String htmlFilePath = "F:\\study\\amz\\git\\pc_service\\page\\list-page\\Automotive\\Tools & Equipment-1-123456789.html";
 			
-			List<AmzProduct> prodList = html.getListPage(2, htmlFilePath);
+			List<AmzProduct> prodList = html.getListPage(1, htmlFilePath);
 			
 			for(AmzProduct prod : prodList) {
 				System.out.println(prod.getProdUrl());
