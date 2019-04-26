@@ -61,6 +61,11 @@ public class AmzProductService {
 			}
 			product.setHtmlFilePath(productTemp.getHtmlFilePath());
 			product.setProdUrl(productTemp.getProdUrl());
+			
+			if(product.getProdPrice() == null || product.getProdPrice() <=0) {
+				product.setProdPrice(productTemp.getProdPrice());
+			}
+			
 			amzProductRespository.save(product);
 			
 			List<AmzProductBsr> bsrList = product.getProductBsrList();
