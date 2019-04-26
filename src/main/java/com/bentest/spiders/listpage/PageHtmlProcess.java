@@ -24,6 +24,30 @@ public class PageHtmlProcess {
 
 	public Map<String,String> getNextPage(int type, String htmlFilePath){
 		
+		Map<String,String> nextPageMap = getNextPageByType(type, htmlFilePath);
+		if(nextPageMap != null && nextPageMap.size() > 0) {
+			return nextPageMap;
+		}
+		
+		// 指定类型获取不到，用其他类型重试
+		Map<Integer,Integer> typeMap = new HashMap<>();
+		typeMap.put(1, 1);
+		typeMap.put(2, 2);
+		// 移除掉试过的类型
+		typeMap.remove(type);
+		
+		for(Integer key : typeMap.keySet()) {
+			nextPageMap = getNextPageByType(key, htmlFilePath);
+			if(nextPageMap != null && nextPageMap.size() > 0) {
+				return nextPageMap;
+			}
+		}
+		
+		return null;
+	}
+	
+	public Map<String,String> getNextPageByType(int type, String htmlFilePath){
+		
 		Map<String,String> nextPageMap = null;
 		if(type == AMZConstant.VALUE_PAGE_TYPE_FIRST) {
 			nextPageMap = getFirstNextPage(htmlFilePath);
@@ -126,7 +150,8 @@ public class PageHtmlProcess {
 		try {
 			PageHtmlProcess html = new PageHtmlProcess();
 			//String htmlFilePath = "C:\\Users\\lenovo\\git\\pc_service\\page\\list-page\\Arts & Crafts-123456789.html";
-			String htmlFilePath = "C:\\Users\\lenovo\\git\\pc_service\\page\\list-page\\Arts & Crafts-page2-123456789.html";
+			//String htmlFilePath = "C:\\Users\\lenovo\\git\\pc_service\\page\\list-page\\Arts & Crafts-page2-123456789.html";
+			String htmlFilePath = "C:\\Users\\lenovo\\git\\pc_service\\page\\list-page\\Automotive\\Tools & Equipment-1-123456789.html";
 			Map<String,String> dataMap = html.getNextPage(2, htmlFilePath);
 			System.out.println(dataMap.toString());
 			
