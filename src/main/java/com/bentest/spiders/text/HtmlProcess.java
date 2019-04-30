@@ -22,7 +22,7 @@ public class HtmlProcess {
 	
 
 	
-	private List<String> getUa(String htmlFilePath) {
+	public List<String> getUa(String htmlFilePath) {
 		try
 		{
 			Document doc = Jsoup.parse( new File(htmlFilePath) , "utf-8" );
