@@ -10,7 +10,7 @@ public class SystemConfig {
 	/**
 	 * 扫描指令Cron表达式，默认每5s一次
 	 */
-	private String scanCmdCron = "0/5 * * * * ?"; 
+	private String scanCmdCron = "0/5 * * * * ?";
 	
 	/**
 	 * 服务端节点编号，最大两位
