@@ -1,6 +1,5 @@
 package com.bentest.spiders.service.department;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +27,8 @@ public class DepSonHtmlProcess {
 	 */
 	public List<AmzDepartment> getDepsFromHtml(String htmlFilePath, String parentDepId) {
 		try {
-			Document doc = Jsoup.parse( new File(htmlFilePath) , "utf-8" );
+			//Document doc = Jsoup.parse( new File(htmlFilePath) , "utf-8" );
+			Document doc = Jsoup.parse( htmlFilePath );
 			if(doc == null) {
 				log.error("解析html获取子类目，获取不到页面对象。htmlFilePath="+htmlFilePath+",parentDepId="+parentDepId);
 				return null;
