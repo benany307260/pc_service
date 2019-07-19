@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
+import com.bentest.spiders.aliyunoss.OSSService;
 import com.bentest.spiders.config.SystemConfig;
 import com.bentest.spiders.constant.AMZConstant;
 import com.bentest.spiders.constant.CmdType;
@@ -44,6 +45,9 @@ public class AmzDepService {
 	
 	@Autowired
     private SystemConfig systemConfig;
+	
+	@Autowired
+	private OSSService ossService;
 	
 	public int dealRootDep(String cmdText) {
 		
@@ -200,7 +204,13 @@ public class AmzDepService {
 			return null;
 		}
 		
-		List<AmzDepartment> depList = depSonHtmlProcess.getDepsFromHtml(parentDep.getHtmlFilePath(), parentDep.getDepId());
+		String content = ossService.downloadString(parentDep.getHtmlFilePath());
+		if(StrUtil.isBlank(content)) {
+			log.error("处理子类目，oss下载内容为空。name="+parentDep.getHtmlFilePath());
+			return null;
+		}
+		
+		List<AmzDepartment> depList = depSonHtmlProcess.getDepsFromHtml(content, parentDep.getDepId());
 		if(depList == null || depList.size() < 1) {
 			log.error("处理子类目，解析获取不到类目数据。param="+parentDep.toString());
 			return null;

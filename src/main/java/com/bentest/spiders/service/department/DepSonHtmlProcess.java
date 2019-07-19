@@ -22,15 +22,15 @@ public class DepSonHtmlProcess {
 	
 	/**
 	 * 解析html获取类目
-	 * @param htmlFilePath
+	 * @param htmlContent
 	 * @return
 	 */
-	public List<AmzDepartment> getDepsFromHtml(String htmlFilePath, String parentDepId) {
+	public List<AmzDepartment> getDepsFromHtml(String htmlContent, String parentDepId) {
 		try {
 			//Document doc = Jsoup.parse( new File(htmlFilePath) , "utf-8" );
-			Document doc = Jsoup.parse( htmlFilePath );
+			Document doc = Jsoup.parse( htmlContent );
 			if(doc == null) {
-				log.error("解析html获取子类目，获取不到页面对象。htmlFilePath="+htmlFilePath+",parentDepId="+parentDepId);
+				log.error("解析html获取子类目，获取不到页面对象。htmlFilePath="+htmlContent+",parentDepId="+parentDepId);
 				return null;
 			}
 			
@@ -46,7 +46,7 @@ public class DepSonHtmlProcess {
 			
 			return null;
 		} catch (Exception e) {
-			log.error("解析html获取子类目，异常。htmlFilePath="+htmlFilePath+",parentDepId="+parentDepId, e);
+			log.error("解析html获取子类目，异常。htmlFilePath="+htmlContent+",parentDepId="+parentDepId, e);
 			return null;
 		}
 	    
