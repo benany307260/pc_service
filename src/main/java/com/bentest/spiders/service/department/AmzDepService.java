@@ -206,7 +206,7 @@ public class AmzDepService {
 		
 		String content = ossService.downloadString(parentDep.getHtmlFilePath());
 		if(StrUtil.isBlank(content)) {
-			log.error("处理子类目，oss下载内容为空。name="+parentDep.getHtmlFilePath());
+			log.error("处理子类目，oss下载内容为空。name="+parentDep.getHtmlFilePath()); 
 			return null;
 		}
 		
