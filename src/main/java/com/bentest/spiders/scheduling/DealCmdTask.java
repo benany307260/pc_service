@@ -1,6 +1,5 @@
 package com.bentest.spiders.scheduling;
 
-import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -9,13 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.bentest.spiders.config.SystemConfig;
-import com.bentest.spiders.constant.CmdType;
 import com.bentest.spiders.dao.CmdMapper;
 import com.bentest.spiders.entity.AmzCmdtask;
-import com.bentest.spiders.listpage.PageService;
-import com.bentest.spiders.listpage.ProductListService;
-import com.bentest.spiders.service.department.AmzDepService;
-import com.bentest.spiders.service.product.AmzProductService;
 
 @Service
 public class DealCmdTask {
@@ -25,7 +19,7 @@ public class DealCmdTask {
 	@Autowired
 	private CmdMapper cmdMapper;
 	
-	@Autowired
+	/*@Autowired
 	private AmzDepService amzDepService;
 	
 	@Autowired
@@ -35,10 +29,13 @@ public class DealCmdTask {
 	private ProductListService productListService;
 	
 	@Autowired
-	private PageService pageService;
+	private PageService pageService;*/
 	
 	@Autowired
     private SystemConfig systemConfig;
+	
+	@Autowired
+	private CmdService cmdService;
 	
 	private static Integer cmdTaskId = 0;
 	
@@ -48,7 +45,7 @@ public class DealCmdTask {
 		//查询指令表 是否有新增操作
 		List<AmzCmdtask> cmdtaskList = cmdMapper.getCmdTask(cmdTaskId, cmdTypes);
 		if(cmdtaskList == null || cmdtaskList.size() < 1) {
-			log.info("处理指令，没有新的指令信息，cmdTaskId:"+cmdTaskId);
+			log.debug("处理指令，没有新的指令信息，cmdTaskId:"+cmdTaskId);
 			return;
 		}
 		
@@ -58,7 +55,9 @@ public class DealCmdTask {
 			}
 			cmdTaskId = cmdTask.getId();
 			
-			// 设置为处理中
+			cmdService.dealCmdTask(cmdTask);
+			
+			/*// 设置为处理中
 			cmdTask.setCmdStatus(1);
 			cmdTask.setUpdateTime(new Date());
 			// 未处理的指令更新为处理中
@@ -73,11 +72,11 @@ public class DealCmdTask {
 			cmdTask.setUpdateTime(new Date());
 			
 			// 更新指令处理结果
-			cmdMapper.updateCmdStatus(cmdTask.getId(), cmdTask.getCmdStatus(), 1);
+			cmdMapper.updateCmdStatus(cmdTask.getId(), cmdTask.getCmdStatus(), 1);*/
 		}
 	}
 	
-	private int deal(AmzCmdtask cmdTask){
+	/*private int deal(AmzCmdtask cmdTask){
 		try {
 			if(cmdTask == null){
 				log.info("指令处理，指令对象为null。");
@@ -118,7 +117,7 @@ public class DealCmdTask {
 			log.error("处理指令，异常。", e);
 			return -9999;
 		}
-	}
+	}*/
 	
 	
 }
